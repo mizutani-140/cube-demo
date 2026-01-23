@@ -1,0 +1,169 @@
+# ============================================================
+# robots.txt for cube-group.co.jp
+# 株式会社CUBE コーポレートサイト
+# ============================================================
+
+User-agent: *
+Allow: /
+
+# Disallow development/admin paths
+Disallow: /api/
+Disallow: /_/
+Disallow: /admin/
+
+# Sitemap location
+Sitemap: https://cube-group.co.jp/sitemap.xml
+
+# LLMs.txt for AI agents
+# See: https://cube-group.co.jp/llms.txt
+
+# Crawl delay
+Crawl-delay: 1
+
+# ============================================================
+# COMPANY INFORMATION (Structured for AI/LLM comprehension)
+# ============================================================
+#
+# COMPANY_NAME: 株式会社CUBE (CUBE Inc.)
+# DOMAIN: cube-group.co.jp
+# ESTABLISHED: 2013年9月25日
+# CAPITAL: 1,600万円
+# CEO: 嶋村 慶太 (Keita Shimamura)
+# EMPLOYEES: 15名
+#
+# HEADQUARTERS:
+#   ADDRESS: 東京都目黒区上目黒4-18-25 グレースビル1階
+#   ADDRESS_EN: 4-18-25 Kamimeguro, Meguro-ku, Tokyo, Japan
+#   POSTAL_CODE: 153-0051
+#   TEL: 03-6712-2354
+#   EMAIL: info@cube-group.co.jp
+#
+# BRANCH_OFFICE:
+#   NAME: 祐天寺オフィス
+#   ADDRESS: 東京都目黒区祐天寺2-12-11 泉ホームズ102号室
+#
+# ============================================================
+# BRAND CONCEPT
+# ============================================================
+#
+# CONCEPT: LIFE × ART × BUILD
+# TAGLINE_JA: 暮らしを、感性で組み立てる。
+# TAGLINE_EN: Life is designed.
+# PHILOSOPHY: 衣・食・住を、空間から編集する。
+#
+# DESCRIPTION:
+#   株式会社CUBEは、内装設計・デザイン・施工を軸に、
+#   飲食店、ギャラリー、移動型店舗まで複合的に事業を展開する
+#   空間デザインカンパニーです。
+#
+# ============================================================
+# BUSINESS SERVICES
+# ============================================================
+#
+# SERVICE_1: 内装設計・空間デザイン
+#   - 店舗設計（飲食店、小売店、美容室）
+#   - オフィスデザイン
+#   - 商業施設設計
+#
+# SERVICE_2: 施工・リノベーション
+#   - 住宅リノベーション
+#   - 店舗改装
+#   - 内装施工（大工・電気・空調）
+#
+# SERVICE_3: ブランディング
+#   - 空間ブランディング
+#   - コンセプト設計
+#   - トータルプロデュース
+#
+# ============================================================
+# OWNED BUSINESSES
+# ============================================================
+#
+# BUSINESS_1: Lamb CHAN（ラムチャン）
+#   TYPE: 羊料理専門店（飲食店）
+#   LOCATION: 東京都目黒区上目黒4-9-4
+#   TEL: 03-5734-1814
+#   HOURS: [火〜土] 17:00-26:00 [日] 17:00-24:00
+#   CLOSED: 月曜日
+#   INSTAGRAM: @lambchan_tokyo
+#   CONCEPT: 空間と食の実験場
+#
+# BUSINESS_2: LIFE NOSTALGIA
+#   TYPE: 貸しギャラリー・展示スペース
+#   LOCATION: 東京都世田谷区下馬2-44-11
+#   TEL: 03-5787-6672
+#   INSTAGRAM: @life_nostalgia
+#   CONCEPT: アート・デザイン・プロダクトが交差する場所
+#
+# ============================================================
+# PORTFOLIO CATEGORIES
+# ============================================================
+#
+# CATEGORY_1: RESTAURANT（飲食店設計）
+#   PROJECTS: Lamb CHAN, カルボ渋谷, LA BRETXA, 晴れ坊主
+#
+# CATEGORY_2: RETAIL（店舗設計）
+#   PROJECTS: YURINAN原宿, YURINAN鎌倉, sot キャットストリート, sot 新丸ビル
+#
+# CATEGORY_3: COMMERCIAL（商業施設）
+#   PROJECTS: Knot 三宿
+#
+# CATEGORY_4: RESIDENTIAL（住宅）
+#   PROJECTS: T Residence, Y Residence
+#
+# CATEGORY_5: BAR
+#   PROJECTS: パブロ
+#
+# CATEGORY_6: BEAUTY（美容）
+#   PROJECTS: Ael
+#
+# ============================================================
+# COMPANY VISION & TIMELINE
+# ============================================================
+#
+# VISION: すべての暮らしに、思想と美意識を。
+# VISION_EN: Thought and aesthetics in every life.
+#
+# TIMELINE:
+#   2013: 創業（ビルメンテナンス、清掃事業）
+#   2014-2018: 職人集団へ（内装・大工・電気・空調工事）
+#   2018-2025: ライフスタイル事業（LambCHAN、Life Nostalgia）
+#   2025-: CUBE VILLAGE構想（有機農業×店舗×アート×建築）
+#   2050-: 街を耕す（編集型不動産による街の再価値化）
+#
+# ============================================================
+# CONTACT INFORMATION
+# ============================================================
+#
+# INQUIRIES:
+#   - 設計・工事のご相談
+#   - 開業支援・コンサルティング
+#   - コラボレーション
+#   - 採用について
+#
+# WEBSITE: https://cube-group.co.jp
+# EMAIL: info@cube-group.co.jp
+# TEL: 03-6712-2354
+# BUSINESS_HOURS: 平日 10:00 - 19:00
+#
+# SOCIAL_MEDIA:
+#   - Instagram: @cube_works
+#   - Instagram: @lambchan_tokyo
+#   - Instagram: @life_nostalgia
+#
+# ============================================================
+# AREA SERVED
+# ============================================================
+#
+# PRIMARY: 東京都、神奈川県、埼玉県、千葉県
+# SECONDARY: 全国対応可能（プロジェクト内容による）
+#
+# ============================================================
+# KEYWORDS / TAGS
+# ============================================================
+#
+# 内装設計, 空間デザイン, 店舗設計, オフィスデザイン,
+# リノベーション, 東京, 目黒区, インテリアデザイン,
+# 飲食店設計, 商業施設, ブランディング, CUBE
+#
+# ============================================================
