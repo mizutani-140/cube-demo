@@ -104,7 +104,7 @@ export const businesses = [
     ],
     color: '#2E7DA8',
     icon: 'ACCESS',
-    image: null,
+    image: '/Access.png',
     isExternal: false,
   },
   {
