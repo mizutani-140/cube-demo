@@ -32,16 +32,38 @@ export function WorksHero() {
         overflow: 'hidden',
       }}
     >
-      {/* Background accent */}
+      {/* Hero image */}
       <div style={{
         position: 'absolute',
-        top: '20%',
-        right: isMobile ? '-30%' : '5%',
-        width: isMobile ? '80vw' : '45vw',
-        height: isMobile ? '80vw' : '45vw',
-        background: `radial-gradient(circle, ${colors.gold}08 0%, transparent 70%)`,
-        pointerEvents: 'none',
-      }} />
+        top: isMobile ? '10%' : '50%',
+        right: isMobile ? '0' : '5%',
+        width: isMobile ? '100%' : '45vw',
+        height: isMobile ? '40vh' : '70vh',
+        transform: isMobile ? 'none' : 'translateY(-50%)',
+        overflow: 'hidden',
+        zIndex: 1,
+      }}>
+        <img
+          src="/portfolio/lamb-chan-3.jpg"
+          alt="CUBE Works"
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            opacity: isMobile ? 0.3 : 0.7,
+            filter: 'brightness(0.85)',
+          }}
+        />
+        {/* Gradient overlay */}
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          background: isMobile
+            ? `linear-gradient(to bottom, ${colors.bg.primary} 0%, transparent 30%, transparent 70%, ${colors.bg.primary} 100%)`
+            : `linear-gradient(to right, ${colors.bg.primary} 0%, transparent 40%, transparent 80%, ${colors.bg.primary}80 100%)`,
+          pointerEvents: 'none',
+        }} />
+      </div>
 
       {/* Large decorative letter */}
       <div

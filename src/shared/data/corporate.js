@@ -214,6 +214,8 @@ export const projects = [
     gallery: [
       '/portfolio/yurinan-harajuku.jpg',
       '/portfolio/yurinan-harajuku-2.jpg',
+      '/portfolio/yurinan-harajuku-3.jpg',
+      '/portfolio/yurinan-harajuku-4.jpg',
     ],
   },
   {
