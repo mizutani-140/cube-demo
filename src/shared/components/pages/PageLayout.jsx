@@ -72,13 +72,13 @@ export function PageHeader({ currentPage, onNavigate, variant = 'default' }) {
             padding: 0,
             display: 'flex',
             alignItems: 'center',
-            gap: '16px',
+            gap: '8px',
           }}
         >
           <div
             style={{
-              width: '36px',
-              height: '36px',
+              width: '32px',
+              height: '32px',
               border: `1px solid ${colors.gold}`,
               display: 'flex',
               alignItems: 'center',
@@ -89,7 +89,7 @@ export function PageHeader({ currentPage, onNavigate, variant = 'default' }) {
             <span
               style={{
                 fontFamily: typography.fontFamily.display,
-                fontSize: '16px',
+                fontSize: '15px',
                 fontWeight: 400,
                 color: colors.gold,
                 letterSpacing: '-0.02em',
@@ -103,8 +103,8 @@ export function PageHeader({ currentPage, onNavigate, variant = 'default' }) {
                 position: 'absolute',
                 top: '-3px',
                 right: '-3px',
-                width: '6px',
-                height: '6px',
+                width: '5px',
+                height: '5px',
                 background: colors.gold,
               }}
             />
@@ -114,13 +114,13 @@ export function PageHeader({ currentPage, onNavigate, variant = 'default' }) {
               style={{
                 fontFamily: typography.fontFamily.display,
                 color: colors.text.primary,
-                fontSize: isMobile ? '16px' : '18px',
-                letterSpacing: '0.15em',
+                fontSize: isMobile ? '15px' : '17px',
+                letterSpacing: '0.02em',
                 fontWeight: 400,
                 margin: 0,
               }}
             >
-              CUBE
+              CUBE Inc.
             </h1>
             {!isMobile && (
               <p
@@ -128,11 +128,11 @@ export function PageHeader({ currentPage, onNavigate, variant = 'default' }) {
                   fontFamily: typography.fontFamily.japanese,
                   color: colors.text.tertiary,
                   fontSize: '9px',
-                  letterSpacing: '0.1em',
-                  marginTop: '2px',
+                  letterSpacing: '0.05em',
+                  marginTop: '1px',
                 }}
               >
-                株式会社キューブ
+                株式会社CUBE
               </p>
             )}
           </div>
@@ -469,7 +469,7 @@ export function PageFooter({ onNavigate }) {
                   letterSpacing: '0.15em',
                 }}
               >
-                株式会社キューブ
+                株式会社CUBE
               </p>
             </div>
             <p

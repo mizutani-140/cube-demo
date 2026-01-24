@@ -163,9 +163,9 @@ function AboutHero() {
           }}
         >
           LIFE
-          <span style={{ color: colors.gold, margin: '0 0.15em' }}>×</span>
+          <span style={{ color: colors.gold, margin: '0 0.03em', fontFamily: typography.fontFamily.japanese }}>×</span>
           ART
-          <span style={{ color: colors.gold, margin: '0 0.15em' }}>×</span>
+          <span style={{ color: colors.gold, margin: '0 0.03em', fontFamily: typography.fontFamily.japanese }}>×</span>
           BUILD
         </h1>
 

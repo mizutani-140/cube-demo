@@ -20,12 +20,12 @@ import * as THREE from 'three';
 // Import shared components
 import { ParticleSystem } from '../../shared/components/3d';
 import { useBreakpoints, useHoverState } from '../../shared/hooks';
-import { colors } from '../../shared/tokens';
+import { colors, typography } from '../../shared/tokens';
 import { brand, company, businesses as corporateBusinesses, vision } from '../../shared/data/corporate';
 
 // Cube configuration
-const CUBE_SIZE = 2.2;
-const CUBE_SIZE_MOBILE = 1.6;
+const CUBE_SIZE = 1.8;
+const CUBE_SIZE_MOBILE = 1.3;
 const FACE_THICKNESS = 0.02;
 
 const facePositions = (size) => {
@@ -96,26 +96,20 @@ function BusinessFace({ business, index, isHovered, onClick, onHover, onLeave, c
       onPointerEnter={(e) => { e.stopPropagation(); onHover(business.id); }}
       onPointerLeave={(e) => { e.stopPropagation(); onLeave(); }}
     >
-      {/* Main face background - dark matte */}
+      {/* Main face background - black */}
       <mesh>
         <boxGeometry args={[cubeSize, cubeSize, FACE_THICKNESS]} />
-        <meshBasicMaterial color="#0a0a12" />
+        <meshBasicMaterial color="#000000" />
       </mesh>
 
-      {/* Image panel - upper 55% */}
-      <mesh position={[0, halfSize * 0.2, zPos]}>
-        <planeGeometry args={[cubeSize * 0.88, cubeSize * 0.52]} />
+      {/* Image panel - full face */}
+      <mesh position={[0, 0, zPos]}>
+        <planeGeometry args={[cubeSize, cubeSize]} />
         <meshBasicMaterial
           map={texture}
           transparent
-          opacity={isHovered ? 0.95 : 0.75}
+          opacity={isHovered ? 1 : 0.85}
         />
-      </mesh>
-
-      {/* Dark text background - lower area */}
-      <mesh position={[0, -halfSize * 0.5, zPos + 0.001]}>
-        <planeGeometry args={[cubeSize * 0.92, cubeSize * 0.35]} />
-        <meshBasicMaterial color="#000000" transparent opacity={0.85} />
       </mesh>
 
       {/* Glow border on hover */}
@@ -125,7 +119,7 @@ function BusinessFace({ business, index, isHovered, onClick, onHover, onLeave, c
           <meshBasicMaterial
             color={accentColor}
             transparent
-            opacity={0.15}
+            opacity={0.4}
           />
         </mesh>
       )}
@@ -263,11 +257,12 @@ function BusinessCube3D({ onNavigate, hoveredId, onHover, onLeave, cubeSize }) {
           />
         ))}
 
-        {/* Inner dark core */}
+        {/* Inner core */}
         <mesh>
           <boxGeometry args={[cubeSize - 0.06, cubeSize - 0.06, cubeSize - 0.06]} />
           <meshBasicMaterial color="#050508" />
         </mesh>
+
       </group>
     </Float>
   );
@@ -1019,25 +1014,70 @@ export default function BusinessCubeDesign({ onNavigate }) {
           left: isMobile ? '20px' : '60px',
           zIndex: 100,
           pointerEvents: 'none',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
         }}
       >
-        <h1 style={{
-          color: colors.gold,
-          fontSize: isMobile ? '16px' : '20px',
-          letterSpacing: isMobile ? '4px' : '6px',
-          fontWeight: 600,
-          margin: 0,
-        }}>
-          CUBE
-        </h1>
-        <p style={{
-          color: 'rgba(255,255,255,0.5)',
-          fontSize: '10px',
-          letterSpacing: '3px',
-          marginTop: '6px',
-        }}>
-          {brand.concept}
-        </p>
+        {/* Logo Mark */}
+        <div
+          style={{
+            width: '32px',
+            height: '32px',
+            border: `1px solid ${colors.gold}`,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            position: 'relative',
+          }}
+        >
+          <span
+            style={{
+              fontFamily: typography.fontFamily.display,
+              fontSize: '15px',
+              fontWeight: 400,
+              color: colors.gold,
+              letterSpacing: '-0.02em',
+            }}
+          >
+            C
+          </span>
+          {/* Corner accent */}
+          <div
+            style={{
+              position: 'absolute',
+              top: '-3px',
+              right: '-3px',
+              width: '5px',
+              height: '5px',
+              background: colors.gold,
+            }}
+          />
+        </div>
+        {/* Logo Text */}
+        <div style={{ textAlign: 'left' }}>
+          <h1 style={{
+            fontFamily: typography.fontFamily.display,
+            color: colors.text.primary,
+            fontSize: isMobile ? '15px' : '17px',
+            letterSpacing: '0.02em',
+            fontWeight: 400,
+            margin: 0,
+          }}>
+            CUBE Inc.
+          </h1>
+          {!isMobile && (
+            <p style={{
+              fontFamily: typography.fontFamily.japanese,
+              color: colors.text.tertiary,
+              fontSize: '9px',
+              letterSpacing: '0.05em',
+              marginTop: '1px',
+            }}>
+              株式会社CUBE
+            </p>
+          )}
+        </div>
       </header>
 
       {/* Tagline (Desktop only - hidden when hamburger menu visible) */}

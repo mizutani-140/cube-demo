@@ -74,12 +74,14 @@ export const colors = {
 export const typography = {
   // Font families - Bold, distinctive choices
   fontFamily: {
-    // Editorial serif for dramatic headlines
-    display: "'Fraunces', 'Playfair Display', 'Noto Serif JP', serif",
-    // Japanese serif for vertical text
-    japanese: "'Noto Serif JP', 'Shippori Mincho', 'Yu Mincho', serif",
+    // Custom display font for brand/logo
+    brand: "'Magnum', 'Arial Black', sans-serif",
+    // Custom display font for headings
+    display: "'GeosansLight', 'Fraunces', 'Playfair Display', serif",
+    // Japanese sans for body text
+    japanese: "'Noto Sans JP', 'Hiragino Sans', sans-serif",
     // Geometric sans with character
-    body: "'Sora', 'Plus Jakarta Sans', sans-serif",
+    body: "'Noto Sans JP', 'Sora', sans-serif",
     // Technical/accent monospace
     mono: "'IBM Plex Mono', 'JetBrains Mono', monospace",
     // Ultra-condensed for impact
@@ -338,7 +340,25 @@ export const cubeConfig = {
 // ============================================
 
 export const globalStyles = `
-  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,200;9..144,400;9..144,600;9..144,700&family=Sora:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Antonio:wght@400;500;600;700&family=Noto+Serif+JP:wght@300;400;500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,200;9..144,400;9..144,600;9..144,700&family=Sora:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Antonio:wght@400;500;600;700&family=Noto+Serif+JP:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap');
+
+  @font-face {
+    font-family: 'Magnum';
+    src: url('/fonts/MAGNUM__.woff2') format('woff2'),
+         url('/fonts/MAGNUM.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: 'GeosansLight';
+    src: url('/fonts/GeosansLight.woff2') format('woff2'),
+         url('/fonts/GeosansLight.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+  }
 
   :root {
     --color-gold: ${colors.gold};
