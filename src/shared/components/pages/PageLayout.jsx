@@ -555,7 +555,7 @@ export function PageFooter({ onNavigate }) {
               SERVICES
             </h4>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-              {['Interior Design', 'Restaurant', 'Food Truck', 'Gallery', 'Agriculture'].map((service) => (
+              {['Interior Design', 'Restaurant', 'Food Truck', 'Gallery'].map((service) => (
                 <li
                   key={service}
                   style={{
@@ -652,7 +652,7 @@ export function PageFooter({ onNavigate }) {
               letterSpacing: '0.05em',
             }}
           >
-            © 2013-2025 {brand.name}. All Rights Reserved.
+            © 2013-2026 株式会社CUBE. All Rights Reserved.
           </p>
         </div>
       </div>
