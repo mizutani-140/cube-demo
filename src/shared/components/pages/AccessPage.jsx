@@ -5,14 +5,19 @@
 
 import React, { useRef, useEffect } from 'react';
 import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useBreakpoints } from '../../hooks/useBreakpoints';
 import { useSEO, SEO_PRESETS } from '../../hooks';
-import { colors } from '../../tokens';
-import { company } from '../../data/corporate';
+import { colors as defaultColors, typography } from '../../tokens';
 import { PageLayout, PageHero, Section, SectionTitle } from './PageLayout';
+import { useTheme } from '../../contexts';
+import { prefersReducedMotion } from '../../animations/gsapSetup';
+import { CompanyInfoSection } from '../CompanyInfoSection';
 
-// Location data
-const locations = [
+gsap.registerPlugin(ScrollTrigger);
+
+// Location data (colors are applied via theme)
+const getLocations = (goldColor) => [
   {
     id: 'office',
     name: 'CUBE 本社',
@@ -26,7 +31,7 @@ const locations = [
     hours: '平日 10:00 - 18:00',
     tel: '03-6712-2354',
     note: '※ご来社の際は事前にご連絡ください',
-    color: colors.gold,
+    color: goldColor,
     mapQuery: '東京都目黒区上目黒4-18-25',
   },
   {
@@ -84,19 +89,45 @@ const locations = [
 function LocationCard({ location, index }) {
   const cardRef = useRef();
   const { isMobile } = useBreakpoints();
+  const { colors, isDark } = useTheme();
 
   useEffect(() => {
-    gsap.fromTo(cardRef.current,
-      { opacity: 0, y: 40 },
-      { opacity: 1, y: 0, duration: 0.5, delay: index * 0.15, ease: 'power2.out' }
-    );
+    if (!cardRef.current) return;
+
+    const reducedMotion = prefersReducedMotion();
+
+    const ctx = gsap.context(() => {
+      gsap.fromTo(cardRef.current,
+        {
+          opacity: 0,
+          y: 50,
+          rotationX: reducedMotion ? 0 : 5,
+          transformPerspective: 800,
+          transformOrigin: 'center bottom',
+        },
+        {
+          opacity: 1,
+          y: 0,
+          rotationX: 0,
+          duration: reducedMotion ? 0.3 : 0.7,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: cardRef.current,
+            start: 'top 85%',
+          },
+          delay: index * 0.1,
+        }
+      );
+    }, cardRef);
+
+    return () => ctx.revert();
   }, [index]);
 
   return (
     <div
       ref={cardRef}
       style={{
-        background: `linear-gradient(135deg, ${location.color}10 0%, #0f0f1a 100%)`,
+        background: `linear-gradient(135deg, ${location.color}10 0%, ${colors.bg.secondary} 100%)`,
         borderRadius: '12px',
         overflow: 'hidden',
         border: `1px solid ${location.color}30`,
@@ -105,7 +136,7 @@ function LocationCard({ location, index }) {
       {/* Google Map */}
       <div style={{
         aspectRatio: '16/9',
-        background: `linear-gradient(135deg, ${location.color}15 0%, #0a0a12 100%)`,
+        background: `linear-gradient(135deg, ${location.color}15 0%, ${colors.bg.primary} 100%)`,
         position: 'relative',
         overflow: 'hidden',
       }}>
@@ -115,7 +146,7 @@ function LocationCard({ location, index }) {
           height="100%"
           style={{
             border: 0,
-            filter: 'grayscale(30%) contrast(1.1)',
+            filter: isDark ? 'grayscale(30%) contrast(1.1)' : 'grayscale(10%) contrast(1.05)',
           }}
           allowFullScreen=""
           loading="lazy"
@@ -129,7 +160,7 @@ function LocationCard({ location, index }) {
           top: '16px',
           left: '16px',
           background: location.color,
-          color: '#000',
+          color: isDark ? '#000' : '#fff',
           fontSize: '9px',
           padding: '4px 12px',
           letterSpacing: '1px',
@@ -151,7 +182,7 @@ function LocationCard({ location, index }) {
         }}>
           <div>
             <h3 style={{
-              color: '#ffffff',
+              color: colors.text.primary,
               fontSize: isMobile ? '18px' : '22px',
               fontWeight: 600,
               letterSpacing: '2px',
@@ -160,7 +191,7 @@ function LocationCard({ location, index }) {
               {location.name}
             </h3>
             <p style={{
-              color: 'rgba(255,255,255,0.5)',
+              color: colors.text.tertiary,
               fontSize: '11px',
               letterSpacing: '1px',
             }}>
@@ -185,13 +216,13 @@ function LocationCard({ location, index }) {
 
         {/* Address */}
         <div style={{
-          background: 'rgba(255,255,255,0.03)',
+          background: colors.ui.hoverBg,
           borderRadius: '8px',
           padding: '16px',
           marginBottom: '20px',
         }}>
           <p style={{
-            color: 'rgba(255,255,255,0.4)',
+            color: colors.text.muted,
             fontSize: '9px',
             letterSpacing: '2px',
             marginBottom: '8px',
@@ -199,7 +230,7 @@ function LocationCard({ location, index }) {
             ADDRESS
           </p>
           <p style={{
-            color: 'rgba(255,255,255,0.8)',
+            color: colors.text.primary,
             fontSize: '13px',
             lineHeight: 1.6,
             margin: '0 0 4px 0',
@@ -207,7 +238,7 @@ function LocationCard({ location, index }) {
             {location.address}
           </p>
           <p style={{
-            color: 'rgba(255,255,255,0.4)',
+            color: colors.text.muted,
             fontSize: '10px',
           }}>
             {location.addressEn}
@@ -217,7 +248,7 @@ function LocationCard({ location, index }) {
         {/* Access */}
         <div style={{ marginBottom: '20px' }}>
           <p style={{
-            color: 'rgba(255,255,255,0.4)',
+            color: colors.text.muted,
             fontSize: '9px',
             letterSpacing: '2px',
             marginBottom: '10px',
@@ -228,7 +259,7 @@ function LocationCard({ location, index }) {
             <p
               key={i}
               style={{
-                color: 'rgba(255,255,255,0.6)',
+                color: colors.text.secondary,
                 fontSize: '12px',
                 lineHeight: 1.7,
                 display: 'flex',
@@ -252,7 +283,7 @@ function LocationCard({ location, index }) {
         }}>
           <div>
             <p style={{
-              color: 'rgba(255,255,255,0.4)',
+              color: colors.text.muted,
               fontSize: '9px',
               letterSpacing: '2px',
               marginBottom: '6px',
@@ -260,7 +291,7 @@ function LocationCard({ location, index }) {
               HOURS
             </p>
             <p style={{
-              color: 'rgba(255,255,255,0.7)',
+              color: colors.text.secondary,
               fontSize: '11px',
               lineHeight: 1.5,
             }}>
@@ -268,7 +299,7 @@ function LocationCard({ location, index }) {
             </p>
             {location.hoursNote && (
               <p style={{
-                color: 'rgba(255,255,255,0.5)',
+                color: colors.text.tertiary,
                 fontSize: '10px',
                 marginTop: '4px',
               }}>
@@ -278,7 +309,7 @@ function LocationCard({ location, index }) {
           </div>
           <div>
             <p style={{
-              color: 'rgba(255,255,255,0.4)',
+              color: colors.text.muted,
               fontSize: '9px',
               letterSpacing: '2px',
               marginBottom: '6px',
@@ -286,7 +317,7 @@ function LocationCard({ location, index }) {
               TEL
             </p>
             <p style={{
-              color: 'rgba(255,255,255,0.7)',
+              color: colors.text.secondary,
               fontSize: '11px',
             }}>
               {location.tel}
@@ -297,7 +328,7 @@ function LocationCard({ location, index }) {
         {/* Note */}
         {location.note && (
           <p style={{
-            color: 'rgba(255,255,255,0.4)',
+            color: colors.text.muted,
             fontSize: '10px',
             fontStyle: 'italic',
           }}>
@@ -315,9 +346,15 @@ function LocationCard({ location, index }) {
 
 export default function AccessPage({ onNavigate }) {
   const { isMobile } = useBreakpoints();
+  const { colors, isDark } = useTheme();
 
   // SEO設定
   useSEO(SEO_PRESETS.access);
+
+  const locations = getLocations(colors.gold);
+
+  // Theme-aware backgrounds
+  const sectionBg = colors.bg.primary;
 
   return (
     <PageLayout currentPage="access" onNavigate={onNavigate}>
@@ -327,7 +364,7 @@ export default function AccessPage({ onNavigate }) {
         subtitle="CUBEの各拠点へのアクセス情報"
       />
 
-      <Section background="#0a0a12">
+      <Section background={sectionBg}>
         <div style={{
           display: 'grid',
           gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)',
@@ -339,83 +376,31 @@ export default function AccessPage({ onNavigate }) {
         </div>
       </Section>
 
-      {/* Company Overview */}
-      <Section background="#0f0f18">
-        <SectionTitle
-          title="会社情報"
-          titleJa="COMPANY INFO"
-        />
-
-        <div style={{
-          background: '#0a0a12',
-          borderRadius: '12px',
-          padding: isMobile ? '30px 24px' : '40px',
-          border: '1px solid rgba(255,255,255,0.08)',
-        }}>
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)',
-            gap: isMobile ? '24px' : '40px',
-          }}>
-            {[
-              { label: '会社名', value: '株式会社CUBE' },
-              { label: '設立', value: company.founded },
-              { label: '資本金', value: company.capital },
-              { label: '代表者', value: `${company.ceoTitle} ${company.ceo}` },
-              { label: 'TEL', value: company.tel },
-              { label: '本社所在地', value: company.headquarters.address },
-              { label: '営業所', value: company.office.address },
-            ].map((item, i) => (
-              <div
-                key={i}
-                style={{
-                  borderBottom: '1px solid rgba(255,255,255,0.06)',
-                  paddingBottom: '16px',
-                }}
-              >
-                <p style={{
-                  color: 'rgba(255,255,255,0.4)',
-                  fontSize: '10px',
-                  letterSpacing: '2px',
-                  marginBottom: '8px',
-                }}>
-                  {item.label}
-                </p>
-                <p style={{
-                  color: 'rgba(255,255,255,0.8)',
-                  fontSize: '13px',
-                  lineHeight: 1.6,
-                  margin: 0,
-                }}>
-                  {item.value}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </Section>
+      <CompanyInfoSection animationDirection="left" />
 
       {/* CTA */}
-      <Section background="#0a0a12">
+      <Section background={sectionBg}>
         <div style={{
           textAlign: 'center',
           padding: isMobile ? '40px 20px' : '60px',
-          background: 'linear-gradient(135deg, rgba(212,175,55,0.1) 0%, transparent 100%)',
+          background: `linear-gradient(135deg, ${colors.gold}20 0%, ${colors.bg.secondary} 100%)`,
           borderRadius: '12px',
-          border: '1px solid rgba(212,175,55,0.2)',
+          border: `1px solid ${colors.gold}40`,
         }}>
           <h3 style={{
-            color: '#ffffff',
+            fontFamily: typography.fontFamily.japanese,
+            color: colors.text.primary,
             fontSize: isMobile ? '20px' : '26px',
-            fontWeight: 300,
-            letterSpacing: '3px',
+            fontWeight: 500,
+            letterSpacing: '0.1em',
             margin: '0 0 16px 0',
           }}>
             ご来社をご希望の方
           </h3>
           <p style={{
-            color: 'rgba(255,255,255,0.5)',
-            fontSize: '12px',
+            fontFamily: typography.fontFamily.body,
+            color: colors.text.secondary,
+            fontSize: '14px',
             lineHeight: 1.8,
             marginBottom: '30px',
             maxWidth: '400px',
@@ -429,7 +414,7 @@ export default function AccessPage({ onNavigate }) {
             style={{
               background: colors.gold,
               border: 'none',
-              color: '#0a0a12',
+              color: colors.bg.primary,
               padding: '14px 40px',
               fontSize: '11px',
               letterSpacing: '2px',

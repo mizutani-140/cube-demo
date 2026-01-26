@@ -9,7 +9,7 @@
  */
 
 import React, { useState, useMemo, useCallback } from 'react';
-import { projects } from '../../data/corporate';
+import { projects } from '../../data/projects';
 import { PageLayout } from './PageLayout';
 import { WorksHero } from './works/WorksHero';
 import { CategoryFilter } from './works/CategoryFilter';

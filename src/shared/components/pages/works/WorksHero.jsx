@@ -1,23 +1,129 @@
 /**
  * WorksHero - Hero Section Component
  *
- * Editorial impact hero with Anime.js v4 timeline animations.
- * Features large decorative "W", accent lines, and staggered text reveals.
+ * Typographic hero with GSAP clip-path reveal, character-level text animation,
+ * and parallax decoration. Awwwards-level entrance sequence.
  */
 
 import React, { useRef, useEffect } from 'react';
+import { gsap } from 'gsap';
 import { useBreakpoints } from '../../../hooks/useBreakpoints';
-import { colors, typography } from '../../../tokens';
-import { useWorksAnimations } from './useWorksAnimations';
+import { typography } from '../../../tokens';
+import { useTheme } from '../../../contexts';
+import { splitText } from '../../../animations/splitText';
+import { prefersReducedMotion } from '../../../animations/gsapSetup';
 
 export function WorksHero() {
   const { isMobile } = useBreakpoints();
+  const { colors } = useTheme();
   const heroRef = useRef();
-  const { animateHero } = useWorksAnimations();
+  const titleRef = useRef();
+  const subtitleRef = useRef();
+  const contentRef = useRef();
 
   useEffect(() => {
-    animateHero(heroRef);
-  }, [animateHero]);
+    if (!heroRef.current) return;
+
+    const ctx = gsap.context(() => {
+      if (prefersReducedMotion()) {
+        gsap.set('.hero-line, .hero-text, .hero-label', { opacity: 1 });
+        gsap.set('.hero-decoration', { opacity: 0.15 });
+        return;
+      }
+
+      const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+
+      // 1. Content area clip-path reveal from center
+      if (contentRef.current) {
+        tl.fromTo(contentRef.current,
+          { clipPath: 'inset(30% 30% 30% 30%)' },
+          { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.5, ease: 'power4.inOut' },
+          0
+        );
+      }
+
+      // 2. Accent lines scale in
+      tl.fromTo('.hero-line',
+        { scaleX: 0 },
+        { scaleX: 1, duration: 1.2, ease: 'power3.inOut', stagger: 0.2 },
+        0.2
+      );
+
+      // 3. Label slide in
+      tl.fromTo('.hero-label',
+        { opacity: 0, x: -20 },
+        { opacity: 1, x: 0, duration: 0.6 },
+        0.5
+      );
+
+      // 4. WORKS title — character rotation drop
+      if (titleRef.current) {
+        const { chars, revert } = splitText(titleRef.current, { type: 'chars' });
+        if (chars.length > 0) {
+          gsap.set(titleRef.current, { opacity: 1 });
+          tl.fromTo(chars,
+            {
+              opacity: 0,
+              rotationX: -90,
+              y: 40,
+              transformOrigin: 'top center',
+            },
+            {
+              opacity: 1,
+              rotationX: 0,
+              y: 0,
+              duration: 0.8,
+              stagger: 0.06,
+              ease: 'power3.out',
+            },
+            0.6
+          );
+        }
+      }
+
+      // 5. Japanese subtitle — character fade up
+      if (subtitleRef.current) {
+        const { chars: subChars, revert: subRevert } = splitText(subtitleRef.current, { type: 'chars' });
+        if (subChars.length > 0) {
+          gsap.set(subtitleRef.current, { opacity: 1 });
+          tl.fromTo(subChars,
+            { opacity: 0, y: 20 },
+            {
+              opacity: 1,
+              y: 0,
+              duration: 0.5,
+              stagger: 0.04,
+              ease: 'power2.out',
+            },
+            1.0
+          );
+        }
+      }
+
+      // 6. Description fade up
+      tl.fromTo('.hero-desc',
+        { opacity: 0, y: 30 },
+        { opacity: 1, y: 0, duration: 0.8 },
+        1.2
+      );
+
+      // 7. Decoration "W" — slow scale + fade
+      tl.fromTo('.hero-decoration',
+        { opacity: 0, scale: 0.9 },
+        { opacity: 0.15, scale: 1, duration: 2.0, ease: 'power2.out' },
+        0.3
+      );
+
+      // 8. Scroll indicator fade in
+      tl.fromTo('.hero-scroll-indicator',
+        { opacity: 0 },
+        { opacity: 1, duration: 1.0 },
+        2.0
+      );
+    }, heroRef);
+
+    return () => ctx.revert();
+  }, []);
 
   return (
     <section
@@ -32,61 +138,52 @@ export function WorksHero() {
         overflow: 'hidden',
       }}
     >
-      {/* Hero image */}
-      <div style={{
-        position: 'absolute',
-        top: isMobile ? '10%' : '50%',
-        right: isMobile ? '0' : '5%',
-        width: isMobile ? '100%' : '45vw',
-        height: isMobile ? '40vh' : '70vh',
-        transform: isMobile ? 'none' : 'translateY(-50%)',
-        overflow: 'hidden',
-        zIndex: 1,
-      }}>
-        <img
-          src="/portfolio/lamb-chan-3.jpg"
-          alt="CUBE Works"
-          style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            opacity: isMobile ? 0.3 : 0.7,
-            filter: 'brightness(0.85)',
-          }}
-        />
-        {/* Gradient overlay */}
-        <div style={{
+      {/* Subtle radial glow behind text */}
+      <div
+        style={{
           position: 'absolute',
-          inset: 0,
-          background: isMobile
-            ? `linear-gradient(to bottom, ${colors.bg.primary} 0%, transparent 30%, transparent 70%, ${colors.bg.primary} 100%)`
-            : `linear-gradient(to right, ${colors.bg.primary} 0%, transparent 40%, transparent 80%, ${colors.bg.primary}80 100%)`,
+          top: '45%',
+          left: isMobile ? '30%' : '25%',
+          transform: 'translate(-50%, -50%)',
+          width: isMobile ? '120vw' : '60vw',
+          height: isMobile ? '120vw' : '60vw',
+          background: `radial-gradient(circle, ${colors.gold}06 0%, transparent 70%)`,
           pointerEvents: 'none',
-        }} />
-      </div>
+        }}
+      />
 
       {/* Large decorative letter */}
       <div
         className="hero-decoration"
         style={{
           position: 'absolute',
-          top: isMobile ? '15%' : '10%',
-          left: isMobile ? '-10%' : '-5%',
-          fontFamily: typography.fontFamily.condensed,
-          fontSize: isMobile ? '35vw' : '25vw',
-          fontWeight: 700,
-          color: colors.ui.border,
-          opacity: 0.03,
-          lineHeight: 0.8,
+          top: '50%',
+          right: isMobile ? '-5%' : '8%',
+          transform: 'translateY(-50%)',
+          fontFamily: typography.fontFamily.display,
+          fontSize: isMobile ? '45vw' : '30vw',
+          fontWeight: 200,
+          color: colors.gold,
+          opacity: 0,
+          lineHeight: 0.85,
           userSelect: 'none',
           pointerEvents: 'none',
+          letterSpacing: '-0.05em',
         }}
+        aria-hidden="true"
       >
         W
       </div>
 
-      {/* Main content */}
-      <div style={{ position: 'relative', zIndex: 2 }}>
+      {/* Main content with clip-path reveal */}
+      <div
+        ref={contentRef}
+        style={{
+          position: 'relative',
+          zIndex: 2,
+          maxWidth: isMobile ? '100%' : '60%',
+        }}
+      >
         {/* Accent line */}
         <div
           className="hero-line"
@@ -101,7 +198,7 @@ export function WorksHero() {
 
         {/* Label */}
         <p
-          className="hero-text"
+          className="hero-label"
           style={{
             fontFamily: typography.fontFamily.condensed,
             fontSize: typography.fontSize.sm,
@@ -115,26 +212,27 @@ export function WorksHero() {
           Selected Works
         </p>
 
-        {/* Main title */}
+        {/* Main title — split by GSAP */}
         <h1
-          className="hero-text"
+          ref={titleRef}
           style={{
             fontFamily: typography.fontFamily.display,
-            fontSize: isMobile ? '13vw' : '8vw',
+            fontSize: isMobile ? '15vw' : '9vw',
             fontWeight: 200,
             color: colors.text.primary,
             letterSpacing: '-0.03em',
-            lineHeight: 0.95,
+            lineHeight: 0.9,
             marginBottom: '40px',
             opacity: 0,
+            perspective: '600px',
           }}
         >
           WORKS
         </h1>
 
-        {/* Japanese subtitle */}
+        {/* Japanese subtitle — split by GSAP */}
         <p
-          className="hero-text"
+          ref={subtitleRef}
           style={{
             fontFamily: typography.fontFamily.japanese,
             fontSize: isMobile ? '16px' : '20px',
@@ -149,7 +247,7 @@ export function WorksHero() {
 
         {/* Description */}
         <p
-          className="hero-text"
+          className="hero-desc"
           style={{
             fontFamily: typography.fontFamily.body,
             fontSize: typography.fontSize.base,
@@ -181,15 +279,19 @@ export function WorksHero() {
 
       {/* Scroll indicator */}
       {!isMobile && (
-        <div style={{
-          position: 'absolute',
-          bottom: '80px',
-          left: '12vw',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: '12px',
-        }}>
+        <div
+          className="hero-scroll-indicator"
+          style={{
+            position: 'absolute',
+            bottom: '80px',
+            left: '12vw',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '12px',
+            opacity: 0,
+          }}
+        >
           <span style={{
             fontFamily: typography.fontFamily.mono,
             fontSize: '10px',
@@ -209,5 +311,3 @@ export function WorksHero() {
     </section>
   );
 }
-
-export default WorksHero;

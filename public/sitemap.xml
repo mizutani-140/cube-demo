@@ -72,6 +72,10 @@
     <lastmod>2024-12-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://www.cube-group.co.jp/portfolio/knot.jpg</image:loc>
+      <image:title>Knot 三宿 - 商業空間設計</image:title>
+    </image:image>
   </url>
 
   <url>
@@ -79,6 +83,10 @@
     <lastmod>2024-12-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://www.cube-group.co.jp/portfolio/yurinan-harajuku.jpg</image:loc>
+      <image:title>YURINAN 原宿 - 和モダン店舗</image:title>
+    </image:image>
   </url>
 
   <url>
@@ -86,6 +94,10 @@
     <lastmod>2024-12-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://www.cube-group.co.jp/portfolio/yurinan-kamakura.jpg</image:loc>
+      <image:title>YURINAN 鎌倉 - リノベーション店舗</image:title>
+    </image:image>
   </url>
 
   <url>
@@ -93,6 +105,21 @@
     <lastmod>2024-12-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://www.cube-group.co.jp/portfolio/sot-catstreet.jpg</image:loc>
+      <image:title>sot キャットストリート - レザーブランドショップ</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.cube-group.co.jp/works/sot-marunouchi</loc>
+    <lastmod>2024-12-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://www.cube-group.co.jp/portfolio/sot-marunouchi.jpg</image:loc>
+      <image:title>sot 新丸ビル - レザーブランドショップ</image:title>
+    </image:image>
   </url>
 
   <url>
@@ -100,6 +127,76 @@
     <lastmod>2024-12-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://www.cube-group.co.jp/portfolio/carbo.jpg</image:loc>
+      <image:title>カルボ渋谷 - イタリアンレストラン</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.cube-group.co.jp/works/la-bretxa</loc>
+    <lastmod>2024-12-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://www.cube-group.co.jp/portfolio/la-bretxa.jpg</image:loc>
+      <image:title>LA BRETXA - バスク料理ダイニング</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.cube-group.co.jp/works/pablo</loc>
+    <lastmod>2024-12-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://www.cube-group.co.jp/portfolio/pablo.jpg</image:loc>
+      <image:title>パブロ - アーティスティックバー</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.cube-group.co.jp/works/ael</loc>
+    <lastmod>2024-12-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://www.cube-group.co.jp/portfolio/ael.jpg</image:loc>
+      <image:title>Ael - 美容サロン</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.cube-group.co.jp/works/t-residence</loc>
+    <lastmod>2024-12-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://www.cube-group.co.jp/portfolio/t-residence.jpg</image:loc>
+      <image:title>T Residence - 住宅リノベーション</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.cube-group.co.jp/works/y-residence</loc>
+    <lastmod>2024-12-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://www.cube-group.co.jp/portfolio/y-residence.jpg</image:loc>
+      <image:title>Y Residence - 住宅リノベーション</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://www.cube-group.co.jp/works/harebozu</loc>
+    <lastmod>2024-12-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <image:image>
+      <image:loc>https://www.cube-group.co.jp/portfolio/harebozu.jpg</image:loc>
+      <image:title>晴れ坊主 - 和食レストラン</image:title>
+    </image:image>
   </url>
 
 </urlset>

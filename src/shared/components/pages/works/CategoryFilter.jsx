@@ -5,10 +5,13 @@
  * Pill-style buttons with gold border on active state.
  */
 
-import React, { useRef, useCallback } from 'react';
+import React, { useRef, useEffect, useCallback } from 'react';
+import { gsap } from 'gsap';
 import { useBreakpoints } from '../../../hooks/useBreakpoints';
-import { colors, typography } from '../../../tokens';
+import { typography } from '../../../tokens';
 import { useWorksAnimations } from './useWorksAnimations';
+import { useTheme } from '../../../contexts';
+import { prefersReducedMotion } from '../../../animations/gsapSetup';
 
 // Available categories
 const CATEGORIES = [
@@ -23,8 +26,34 @@ const CATEGORIES = [
 
 export function CategoryFilter({ activeFilter, onFilterChange, projectCounts = {} }) {
   const { isMobile } = useBreakpoints();
+  const { colors } = useTheme();
   const { animateFilterClick } = useWorksAnimations();
   const buttonRefs = useRef({});
+  const filterContainerRef = useRef();
+  const hasAnimated = useRef(false);
+
+  // Stagger entrance for filter buttons
+  useEffect(() => {
+    if (!filterContainerRef.current || hasAnimated.current || prefersReducedMotion()) return;
+
+    const buttons = filterContainerRef.current.querySelectorAll('.filter-btn');
+    if (buttons.length === 0) return;
+
+    hasAnimated.current = true;
+
+    gsap.fromTo(buttons,
+      { opacity: 0, y: 15, scale: 0.9 },
+      {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        duration: 0.45,
+        stagger: 0.05,
+        ease: 'power3.out',
+        delay: 0.2,
+      }
+    );
+  }, []);
 
   const handleClick = useCallback((categoryId) => {
     const button = buttonRefs.current[categoryId];
@@ -33,6 +62,26 @@ export function CategoryFilter({ activeFilter, onFilterChange, projectCounts = {
     }
     onFilterChange(categoryId);
   }, [onFilterChange, animateFilterClick]);
+
+  const handleHoverEnter = useCallback((e, isActive) => {
+    if (!isActive && !prefersReducedMotion()) {
+      gsap.to(e.currentTarget, { scale: 1.06, duration: 0.25, ease: 'power2.out' });
+    }
+    if (!isActive) {
+      e.currentTarget.style.borderColor = colors.ui.borderHover;
+      e.currentTarget.style.background = colors.bg.tertiary;
+    }
+  }, [colors]);
+
+  const handleHoverLeave = useCallback((e, isActive) => {
+    if (!prefersReducedMotion()) {
+      gsap.to(e.currentTarget, { scale: 1, duration: 0.3, ease: 'power2.out' });
+    }
+    if (!isActive) {
+      e.currentTarget.style.borderColor = colors.ui.border;
+      e.currentTarget.style.background = 'transparent';
+    }
+  }, [colors]);
 
   return (
     <div
@@ -89,6 +138,7 @@ export function CategoryFilter({ activeFilter, onFilterChange, projectCounts = {
 
       {/* Filter buttons */}
       <div
+        ref={filterContainerRef}
         style={{
           display: 'flex',
           flexWrap: 'wrap',
@@ -108,6 +158,7 @@ export function CategoryFilter({ activeFilter, onFilterChange, projectCounts = {
             <button
               key={category.id}
               ref={(el) => { buttonRefs.current[category.id] = el; }}
+              className="filter-btn"
               onClick={() => handleClick(category.id)}
               style={{
                 display: 'flex',
@@ -118,21 +169,11 @@ export function CategoryFilter({ activeFilter, onFilterChange, projectCounts = {
                 border: `1px solid ${isActive ? colors.gold : colors.ui.border}`,
                 borderRadius: '30px',
                 cursor: 'pointer',
-                transition: 'all 0.3s ease',
+                transition: 'border-color 0.3s ease, background 0.3s ease',
                 outline: 'none',
               }}
-              onMouseEnter={(e) => {
-                if (!isActive) {
-                  e.currentTarget.style.borderColor = colors.ui.borderHover;
-                  e.currentTarget.style.background = colors.bg.tertiary;
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!isActive) {
-                  e.currentTarget.style.borderColor = colors.ui.border;
-                  e.currentTarget.style.background = 'transparent';
-                }
-              }}
+              onMouseEnter={(e) => handleHoverEnter(e, isActive)}
+              onMouseLeave={(e) => handleHoverLeave(e, isActive)}
             >
               <span style={{
                 fontFamily: typography.fontFamily.condensed,
@@ -162,5 +203,3 @@ export function CategoryFilter({ activeFilter, onFilterChange, projectCounts = {
     </div>
   );
 }
-
-export default CategoryFilter;

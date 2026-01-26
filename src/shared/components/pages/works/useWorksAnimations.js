@@ -177,6 +177,11 @@ export function useWorksAnimations() {
     const closeBtn = modalElement.querySelector('.modal-close-btn');
     const elements = modalElement.querySelectorAll('.case-study-element');
 
+    // Show close button immediately (no animation delay)
+    if (closeBtn) {
+      closeBtn.style.opacity = '1';
+    }
+
     const tl = new Timeline({
       defaults: { ease: 'outQuint' }
     });
@@ -188,20 +193,12 @@ export function useWorksAnimations() {
       });
     }
 
-    if (closeBtn) {
-      tl.add(closeBtn, {
-        opacity: [0, 1],
-        translateY: [-20, 0],
-        duration: 400,
-      }, '-=100');
-    }
-
     if (content) {
       tl.add(content, {
         scale: [0.92, 1],
         opacity: [0, 1],
         duration: 500,
-      }, '-=300');
+      }, '-=200');
     }
 
     if (elements.length) {

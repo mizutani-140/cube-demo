@@ -7,14 +7,23 @@
 
 import React, { useRef, useEffect, useCallback, useState } from 'react';
 import { useBreakpoints } from '../../../hooks/useBreakpoints';
-import { colors, typography, zIndex } from '../../../tokens';
+import { colors as defaultColors, typography, zIndex } from '../../../tokens';
 import { useWorksAnimations } from './useWorksAnimations';
+import { useTheme } from '../../../contexts';
+import { useSEO, getProjectSEO } from '../../../hooks/useSEO';
 
 export function CaseStudyModal({ project, isOpen, onClose }) {
   const { isMobile } = useBreakpoints();
+  const { colors, isDark } = useTheme();
   const modalRef = useRef();
   const { animateModalOpen, animateModalClose } = useWorksAnimations();
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+
+  // SEO: プロジェクト詳細ページのメタ情報を動的に更新
+  useSEO(isOpen && project ? getProjectSEO(project) : {});
+
+  // Theme-aware backdrop
+  const backdropBg = isDark ? 'rgba(6, 6, 10, 0.95)' : 'rgba(245, 242, 235, 0.95)';
 
   // Reset active image when project changes
   useEffect(() => {
@@ -100,62 +109,12 @@ export function CaseStudyModal({ project, isOpen, onClose }) {
         style={{
           position: 'absolute',
           inset: 0,
-          background: 'rgba(6, 6, 10, 0.95)',
+          background: backdropBg,
           backdropFilter: 'blur(12px)',
           opacity: 0,
         }}
       />
 
-      {/* Close button - positioned outside modal */}
-      <button
-        onClick={handleClose}
-        aria-label="Close modal"
-        className="modal-close-btn"
-        style={{
-          position: 'absolute',
-          top: isMobile ? '16px' : '24px',
-          right: isMobile ? '16px' : '24px',
-          height: '44px',
-          padding: '0 20px',
-          background: 'rgba(0, 0, 0, 0.7)',
-          border: `1px solid ${colors.ui.borderHover}`,
-          borderRadius: '22px',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '8px',
-          zIndex: zIndex.modal + 10,
-          transition: 'all 0.3s ease',
-          opacity: 0,
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.background = colors.gold;
-          e.currentTarget.style.borderColor = colors.gold;
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.background = 'rgba(0, 0, 0, 0.7)';
-          e.currentTarget.style.borderColor = colors.ui.borderHover;
-        }}
-      >
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-          <path
-            d="M12 4L4 12M4 4L12 12"
-            stroke={colors.text.primary}
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-        <span style={{
-          fontFamily: typography.fontFamily.condensed,
-          fontSize: '12px',
-          color: colors.text.primary,
-          letterSpacing: '0.1em',
-        }}>
-          閉じる
-        </span>
-      </button>
 
       {/* Modal content */}
       <div
@@ -176,6 +135,55 @@ export function CaseStudyModal({ project, isOpen, onClose }) {
         aria-labelledby="modal-title"
         aria-modal="true"
       >
+        {/* Back button - inside modal */}
+        <button
+          onClick={handleClose}
+          aria-label="戻る"
+          className="modal-close-btn"
+          style={{
+            position: 'sticky',
+            top: 0,
+            left: 0,
+            width: '100%',
+            padding: isMobile ? '14px 20px' : '16px 24px',
+            background: colors.bg.secondary,
+            border: 'none',
+            borderBottom: `1px solid ${colors.ui.divider}`,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            zIndex: 10,
+            transition: 'all 0.3s ease',
+            touchAction: 'manipulation',
+            WebkitTapHighlightColor: 'transparent',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = colors.bg.tertiary || colors.bg.secondary;
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = colors.bg.secondary;
+          }}
+        >
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path
+              d="M12 5L7 10L12 15"
+              stroke={colors.gold}
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+          <span style={{
+            fontFamily: typography.fontFamily.condensed,
+            fontSize: isMobile ? '14px' : '13px',
+            color: colors.gold,
+            letterSpacing: '0.1em',
+            fontWeight: 600,
+          }}>
+            {isMobile ? '一覧に戻る' : 'BACK TO LIST'}
+          </span>
+        </button>
 
         {/* Main image viewer */}
         <div
@@ -597,5 +605,3 @@ export function CaseStudyModal({ project, isOpen, onClose }) {
     </div>
   );
 }
-
-export default CaseStudyModal;

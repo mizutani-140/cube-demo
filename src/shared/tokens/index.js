@@ -249,6 +249,7 @@ export const animation = {
   duration: {
     instant: '0.1s',
     fast: '0.2s',
+    medium: '0.3s',   // Between fast and normal — page exit, micro-interactions
     normal: '0.4s',
     slow: '0.6s',
     slower: '0.8s',
@@ -267,6 +268,12 @@ export const animation = {
     bounce: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
     smooth: 'cubic-bezier(0.25, 0.1, 0.25, 1)',
   },
+
+  // GSAP easing equivalents (for reference)
+  // gsap.entrance = 'power3.out'     ≈ CSS dramatic
+  // gsap.exit     = 'power2.in'      accelerating exit
+  // gsap.transition = 'power2.inOut' symmetric transition
+  // gsap.warp     = 'power4.in'      extreme acceleration
 
   // Common transitions
   transition: {
@@ -303,10 +310,11 @@ export const zIndex = {
   raised: 10,
   dropdown: 100,
   sticky: 200,
-  modal: 300,
-  overlay: 400,
-  toast: 500,
-  tooltip: 600,
+  header: 1000,
+  modal: 2000,
+  overlay: 2100,
+  toast: 2200,
+  tooltip: 2300,
   max: 9999,
 };
 
@@ -380,7 +388,6 @@ export const globalStyles = `
   }
 
   html {
-    scroll-behavior: smooth;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }

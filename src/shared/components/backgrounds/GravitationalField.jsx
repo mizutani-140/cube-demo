@@ -2,16 +2,25 @@
  * Gravitational Field Background
  * Three.jsによる高度な3D空間座標と重力場の表現
  * 非ユークリッド幾何学的な時空の歪み - 強化版
+ *
+ * transitionIntensityRef: ページ遷移時の重力場強度 (0〜1)
  */
 
-import React, { useRef, useMemo } from 'react';
+import React, { useRef, useMemo, createContext, useContext } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
+// Simple theme context for 3D scene (receives theme from parent)
+const SceneThemeContext = createContext({ isDark: true });
+
+// Transition intensity context (ref-based for R3F performance)
+const TransitionContext = createContext({ current: { value: 0 } });
+
 // 重力で歪むグリッドメッシュ - 強化版
-function WarpedGrid({ position = [0, 0, 0], rotation = [0, 0, 0], size = 40, divisions = 40, color = '#b8941f', opacity = 0.15 }) {
+function WarpedGrid({ position = [0, 0, 0], rotation = [0, 0, 0], size = 40, divisions = 40, color = '#f0c830', opacity = 0.15 }) {
   const meshRef = useRef();
   const geometryRef = useRef();
+  const intensityRef = useContext(TransitionContext);
 
   // グリッドの頂点を生成
   const { positions, indices, originalPositions } = useMemo(() => {
@@ -58,11 +67,12 @@ function WarpedGrid({ position = [0, 0, 0], rotation = [0, 0, 0], size = 40, div
 
     const time = clock.getElapsedTime();
     const posArray = geometryRef.current.attributes.position.array;
+    const t = intensityRef.current.value;
 
-    // 強化されたパラメータ - 穴を大きく
-    const gravityStrength = 35; // より強い重力
-    const eventHorizon = 2.5;   // より広い事象の地平線
-    const maxDepth = -25;       // より深い凹み
+    // 遷移強度に応じたパラメータ補間（穴を浅めに）
+    const gravityStrength = 20 + t * 15;  // 20→35
+    const eventHorizon = 3.5 - t * 1.0;    // 3.5→2.5
+    const maxDepth = -12 - t * 8;           // -12→-20
 
     for (let i = 0; i < originalPositions.length; i += 3) {
       const ox = originalPositions[i];
@@ -76,16 +86,16 @@ function WarpedGrid({ position = [0, 0, 0], rotation = [0, 0, 0], size = 40, div
         // 強化された重力による下方向への歪み（深い漏斗状）
         const warp = gravityStrength / (dist + eventHorizon);
 
-        // 指数関数的な凹み（中心に近いほど急激に深くなる）
-        const displacement = Math.max(maxDepth, -Math.pow(warp, 2.2) * 0.8);
+        // 指数関数的な凹み（中心に近いほど急激に深くなる）- 控えめに
+        const displacement = Math.max(maxDepth, -Math.pow(warp, 1.8) * 0.4);
 
-        // フレームドラッギング（回転効果）- 強化
-        const rotationAmount = warp * 0.04 * Math.sin(time * 0.3);
+        // フレームドラッギング（回転効果）- 遷移時に強化
+        const rotationAmount = warp * (0.04 + t * 0.06) * Math.sin(time * (0.3 + t * 0.5));
         const cos = Math.cos(rotationAmount);
         const sin = Math.sin(rotationAmount);
 
-        // 螺旋状の引き込み効果
-        const spiralPull = Math.sin(time * 0.2 + dist * 0.3) * (warp * 0.1);
+        // 螺旋状の引き込み効果 - 遷移時に強化
+        const spiralPull = Math.sin(time * (0.2 + t * 0.4) + dist * 0.3) * (warp * (0.1 + t * 0.15));
 
         posArray[i] = (ox * cos - oz * sin) * (1 - spiralPull * 0.02);
         posArray[i + 1] = displacement + Math.sin(time * 0.2 + dist * 0.4) * 0.08;
@@ -123,28 +133,30 @@ function WarpedGrid({ position = [0, 0, 0], rotation = [0, 0, 0], size = 40, div
 }
 
 // 同心円状のリング（重力場の等高線）- 強化版
-function GravityRings({ count = 15, maxRadius = 18, color = '#b8941f' }) {
+function GravityRings({ count = 15, maxRadius = 18, color = '#f0c830' }) {
   const ringsRef = useRef([]);
+  const intensityRef = useContext(TransitionContext);
 
   useFrame(({ clock }) => {
     const time = clock.getElapsedTime();
-    const gravityStrength = 35;
-    const eventHorizon = 2.5;
+    const t = intensityRef.current.value;
+    const gravityStrength = 20 + t * 15;
+    const eventHorizon = 3.5 - t * 1.0;
 
     ringsRef.current.forEach((ring, i) => {
       if (ring) {
         const baseRadius = (i + 1) * (maxRadius / count);
         const warp = gravityStrength / (baseRadius + eventHorizon);
 
-        // より深い凹み
-        const depth = -Math.pow(warp, 2.0) * 1.2;
-        ring.position.y = depth + Math.sin(time * 0.2 + i * 0.4) * 0.05;
+        // 浅めの凹み
+        const depth = -Math.pow(warp, 2.0) * 0.6;
+        ring.position.y = depth + Math.sin(time * (0.2 + t * 0.3) + i * 0.4) * 0.05;
 
-        // 傾きも強化
-        ring.rotation.x = Math.PI / 2 + warp * 0.15;
+        // 傾き（控えめ）
+        ring.rotation.x = Math.PI / 2 + warp * (0.08 + t * 0.06);
 
         // スケールも歪める（中心に近いほど縮小）
-        const scale = 1 - warp * 0.02;
+        const scale = 1 - warp * (0.02 + t * 0.01);
         ring.scale.set(scale, scale, 1);
       }
     });
@@ -154,10 +166,10 @@ function GravityRings({ count = 15, maxRadius = 18, color = '#b8941f' }) {
     <group>
       {Array.from({ length: count }).map((_, i) => {
         const radius = (i + 1) * (maxRadius / count);
-        const opacity = 0.2 * (1 - i / count) + 0.05;
+        const opacity = 0.55 * (1 - i / count) + 0.15;
         return (
           <mesh key={i} ref={(el) => (ringsRef.current[i] = el)} rotation={[Math.PI / 2, 0, 0]}>
-            <ringGeometry args={[radius - 0.03, radius + 0.03, 80]} />
+            <ringGeometry args={[radius - 0.06, radius + 0.06, 80]} />
             <meshBasicMaterial color={color} transparent opacity={opacity} side={THREE.DoubleSide} />
           </mesh>
         );
@@ -167,9 +179,10 @@ function GravityRings({ count = 15, maxRadius = 18, color = '#b8941f' }) {
 }
 
 // 放射状のライン（座標軸）- 強化版
-function RadialLines({ count = 24, length = 22, color = '#b8941f' }) {
+function RadialLines({ count = 24, length = 22, color = '#f0c830' }) {
   const linesRef = useRef();
-  const segments = 40; // より細かいセグメント
+  const intensityRef = useContext(TransitionContext);
+  const segments = 55; // より細かいセグメント
 
   const geometry = useMemo(() => {
     const positions = [];
@@ -194,9 +207,11 @@ function RadialLines({ count = 24, length = 22, color = '#b8941f' }) {
     if (!linesRef.current) return;
     const time = clock.getElapsedTime();
     const posArray = linesRef.current.geometry.attributes.position.array;
+    const ti = intensityRef.current.value;
 
-    const gravityStrength = 35;
-    const eventHorizon = 2.5;
+    const gravityStrength = 20 + ti * 15;
+    const eventHorizon = 3.5 - ti * 1.0;
+    const maxDepth = -12 - ti * 8;
 
     let idx = 0;
     for (let i = 0; i < count; i++) {
@@ -212,9 +227,9 @@ function RadialLines({ count = 24, length = 22, color = '#b8941f' }) {
           let y;
           if (dist > 2.0) {
             const warp = gravityStrength / (dist + eventHorizon);
-            y = -Math.pow(warp, 2.0) * 1.2 + Math.sin(time * 0.2 + dist * 0.4) * 0.08;
+            y = -Math.pow(warp, 2.0) * 0.6 + Math.sin(time * 0.2 + dist * 0.4) * 0.08;
           } else {
-            y = -25;
+            y = maxDepth;
           }
 
           posArray[idx] = x;
@@ -230,30 +245,34 @@ function RadialLines({ count = 24, length = 22, color = '#b8941f' }) {
 
   return (
     <lineSegments ref={linesRef} geometry={geometry}>
-      <lineBasicMaterial color={color} transparent opacity={0.12} />
+      <lineBasicMaterial color={color} transparent opacity={0.4} />
     </lineSegments>
   );
 }
 
-// 浮遊するパーティクル（星/光子）- 強化版
-function FloatingParticles({ count = 250, color = '#d4af37' }) {
+// 素粒子パーティクル - 極微細な量子レベル粒子
+function FloatingParticles({ count = 250, color = '#ffd740' }) {
   const particlesRef = useRef();
+  const dustRef = useRef();
+  const intensityRef = useContext(TransitionContext);
 
+  // メイン粒子（重力に引かれる素粒子）
   const { positions, velocities } = useMemo(() => {
     const pos = [];
     const vel = [];
     for (let i = 0; i < count; i++) {
       const theta = Math.random() * Math.PI * 2;
-      const radius = 4 + Math.random() * 22;
+      const radius = 3 + Math.random() * 65;
+      const height = (Math.random() - 0.5) * 35;
       pos.push(
         Math.cos(theta) * radius,
-        (Math.random() - 0.5) * 15,
+        height,
         Math.sin(theta) * radius
       );
       vel.push(
-        (Math.random() - 0.5) * 0.015,
-        (Math.random() - 0.5) * 0.01,
-        (Math.random() - 0.5) * 0.015
+        (Math.random() - 0.5) * 0.008,
+        (Math.random() - 0.5) * 0.005,
+        (Math.random() - 0.5) * 0.008
       );
     }
     return {
@@ -262,10 +281,31 @@ function FloatingParticles({ count = 250, color = '#d4af37' }) {
     };
   }, [count]);
 
+  // 量子ダスト（静的な微粒子の場）
+  const dustCount = count * 3;
+  const dustPositions = useMemo(() => {
+    const pos = [];
+    for (let i = 0; i < dustCount; i++) {
+      const theta = Math.random() * Math.PI * 2;
+      const phi = (Math.random() - 0.5) * Math.PI;
+      const radius = 2 + Math.random() * 68;
+      pos.push(
+        Math.cos(theta) * Math.cos(phi) * radius,
+        Math.sin(phi) * radius * 0.4 + (Math.random() - 0.5) * 15,
+        Math.sin(theta) * Math.cos(phi) * radius
+      );
+    }
+    return new Float32Array(pos);
+  }, [dustCount]);
+
   useFrame(({ clock }) => {
     if (!particlesRef.current) return;
     const posArray = particlesRef.current.geometry.attributes.position.array;
     const time = clock.getElapsedTime();
+    const ti = intensityRef.current.value;
+
+    // 遷移時の重力倍率: 0.8→2.8
+    const gravityMult = 0.8 + ti * 2.0;
 
     for (let i = 0; i < count; i++) {
       const idx = i * 3;
@@ -273,92 +313,117 @@ function FloatingParticles({ count = 250, color = '#d4af37' }) {
       const y = posArray[idx + 1];
       const z = posArray[idx + 2];
 
-      // 強化された重力による引き込み
       const dist = Math.sqrt(x * x + z * z);
       if (dist > 0.5) {
-        const gravity = 1.2 / (dist * dist);
+        const gravity = gravityMult / (dist * dist);
         velocities[idx] -= (x / dist) * gravity;
         velocities[idx + 2] -= (z / dist) * gravity;
 
-        // 下方向への引力も追加
-        const verticalPull = 0.3 / (dist + 2);
-        velocities[idx + 1] -= verticalPull * 0.1;
+        const verticalPull = (0.2 + ti * 0.4) / (dist + 2);
+        velocities[idx + 1] -= verticalPull * 0.08;
       }
 
-      // 位置更新
+      // 量子揺らぎ（不確定性原理的な微振動）
+      const jitter = 0.003 + ti * 0.005;
+      velocities[idx] += (Math.random() - 0.5) * jitter;
+      velocities[idx + 1] += (Math.random() - 0.5) * jitter * 0.5;
+      velocities[idx + 2] += (Math.random() - 0.5) * jitter;
+
       posArray[idx] += velocities[idx];
       posArray[idx + 1] += velocities[idx + 1];
       posArray[idx + 2] += velocities[idx + 2];
 
-      // リセット条件を調整（大きな穴に対応）
       const newDist = Math.sqrt(posArray[idx] ** 2 + posArray[idx + 2] ** 2);
-      if (newDist < 3.0 || newDist > 28 || posArray[idx + 1] < -28) {
+      if (newDist < 3.0 || newDist > 72 || posArray[idx + 1] < -40) {
         const theta = Math.random() * Math.PI * 2;
-        const radius = 12 + Math.random() * 14;
+        const radius = 18 + Math.random() * 48;
         posArray[idx] = Math.cos(theta) * radius;
-        posArray[idx + 1] = 5 + Math.random() * 8;
+        posArray[idx + 1] = 8 + Math.random() * 20;
         posArray[idx + 2] = Math.sin(theta) * radius;
-        velocities[idx] = (Math.random() - 0.5) * 0.015;
-        velocities[idx + 1] = -Math.random() * 0.01;
-        velocities[idx + 2] = (Math.random() - 0.5) * 0.015;
+        velocities[idx] = (Math.random() - 0.5) * 0.008;
+        velocities[idx + 1] = -Math.random() * 0.005;
+        velocities[idx + 2] = (Math.random() - 0.5) * 0.008;
       }
     }
 
     particlesRef.current.geometry.attributes.position.needsUpdate = true;
+
+    // 量子ダストの微細な揺らぎ
+    if (dustRef.current) {
+      const dArray = dustRef.current.geometry.attributes.position.array;
+      for (let i = 0; i < dustCount; i++) {
+        const idx = i * 3;
+        dArray[idx] += Math.sin(time * 0.5 + i * 0.1) * 0.002;
+        dArray[idx + 1] += Math.cos(time * 0.3 + i * 0.07) * 0.001;
+        dArray[idx + 2] += Math.sin(time * 0.4 + i * 0.13) * 0.002;
+      }
+      dustRef.current.geometry.attributes.position.needsUpdate = true;
+    }
   });
 
   return (
-    <points ref={particlesRef}>
-      <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          count={positions.length / 3}
-          array={positions}
-          itemSize={3}
-        />
-      </bufferGeometry>
-      <pointsMaterial color={color} size={0.1} transparent opacity={0.7} sizeAttenuation />
-    </points>
+    <group>
+      {/* メイン素粒子 - 重力に引かれる */}
+      <points ref={particlesRef}>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            count={positions.length / 3}
+            array={positions}
+            itemSize={3}
+          />
+        </bufferGeometry>
+        <pointsMaterial color={color} size={0.045} transparent opacity={0.85} sizeAttenuation />
+      </points>
+      {/* 量子ダスト - 空間を満たす微粒子場 */}
+      <points ref={dustRef}>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            count={dustPositions.length / 3}
+            array={dustPositions}
+            itemSize={3}
+          />
+        </bufferGeometry>
+        <pointsMaterial color={color} size={0.025} transparent opacity={0.5} sizeAttenuation />
+      </points>
+    </group>
   );
 }
 
 // 事象の地平線エフェクト（中心の光るリング）
-function EventHorizon({ color = '#d4af37' }) {
+function EventHorizon({ color = '#ffd740' }) {
   const ringRef = useRef();
   const glowRef = useRef();
+  const intensityRef = useContext(TransitionContext);
 
   useFrame(({ clock }) => {
     const time = clock.getElapsedTime();
+    const t = intensityRef.current.value;
+
     if (ringRef.current) {
-      ringRef.current.rotation.z = time * 0.5;
-      ringRef.current.material.opacity = 0.4 + Math.sin(time * 2) * 0.15;
+      // 遷移時にリング回転加速: 0.5→5.0
+      ringRef.current.rotation.z = time * (0.5 + t * 4.5);
+      ringRef.current.material.opacity = (0.25 + t * 0.15) + Math.sin(time * 2) * 0.08;
     }
     if (glowRef.current) {
-      glowRef.current.scale.setScalar(1 + Math.sin(time * 1.5) * 0.1);
-      glowRef.current.material.opacity = 0.15 + Math.sin(time * 2) * 0.05;
+      // 遷移時にグロー拡大・不透明度増加
+      const glowScale = (1 + t * 0.5) + Math.sin(time * 1.5) * 0.05;
+      glowRef.current.scale.setScalar(glowScale);
+      glowRef.current.material.opacity = (0.1 + t * 0.15) + Math.sin(time * 2) * 0.04;
     }
   });
 
   return (
-    <group position={[0, -25, 0]} rotation={[Math.PI / 2, 0, 0]}>
-      {/* 中心の暗い円（ブラックホール） */}
-      <mesh>
-        <circleGeometry args={[2.5, 64]} />
-        <meshBasicMaterial color="#000000" transparent opacity={0.9} side={THREE.DoubleSide} />
-      </mesh>
+    <group position={[0, -12, 0]} rotation={[Math.PI / 2, 0, 0]}>
       {/* メインリング */}
       <mesh ref={ringRef}>
-        <ringGeometry args={[2.5, 4, 64]} />
-        <meshBasicMaterial color={color} transparent opacity={0.6} side={THREE.DoubleSide} />
+        <ringGeometry args={[1.5, 2.8, 64]} />
+        <meshBasicMaterial color={color} transparent opacity={0.2} side={THREE.DoubleSide} />
       </mesh>
       {/* グローエフェクト */}
       <mesh ref={glowRef}>
-        <ringGeometry args={[3.5, 7, 64]} />
-        <meshBasicMaterial color={color} transparent opacity={0.2} side={THREE.DoubleSide} />
-      </mesh>
-      {/* 外側のグロー */}
-      <mesh>
-        <ringGeometry args={[6, 10, 64]} />
+        <ringGeometry args={[2.5, 4.5, 64]} />
         <meshBasicMaterial color={color} transparent opacity={0.08} side={THREE.DoubleSide} />
       </mesh>
     </group>
@@ -366,7 +431,7 @@ function EventHorizon({ color = '#d4af37' }) {
 }
 
 // 垂直グリッド（壁面）- 歪み追加
-function VerticalGrid({ position, rotation, size = 30, divisions = 30, color = '#b8941f', opacity = 0.05 }) {
+function VerticalGrid({ position, rotation, size = 30, divisions = 30, color = '#f0c830', opacity = 0.05 }) {
   return (
     <group position={position} rotation={rotation}>
       <gridHelper args={[size, divisions, color, color]} material-opacity={opacity} material-transparent />
@@ -374,44 +439,83 @@ function VerticalGrid({ position, rotation, size = 30, divisions = 30, color = '
   );
 }
 
+// コンテナの視覚強調（opacity のみ — CSS filter は GPU 負荷が高いため不使用）
+function ContainerFilterUpdater({ containerRef }) {
+  const intensityRef = useContext(TransitionContext);
+
+  useFrame(() => {
+    if (!containerRef.current) return;
+    const t = intensityRef.current.value;
+    // 遷移中に重力場を少し明るく見せる（opacity 操作のみ）
+    containerRef.current.style.opacity = t > 0.001 ? String(1 + t * 0.15) : '';
+  });
+
+  return null;
+}
+
 // メインシーン
 function Scene() {
   const groupRef = useRef();
+  const { isDark } = useContext(SceneThemeContext);
+  const intensityRef = useContext(TransitionContext);
+
+  // Adjust opacity based on theme
+  const baseOpacity = isDark ? 1 : 0.7;
 
   useFrame(({ clock }) => {
     if (groupRef.current) {
-      groupRef.current.rotation.y = clock.getElapsedTime() * 0.015;
+      const t = intensityRef.current.value;
+      // 遷移時に回転速度10倍加速: 0.015→0.15
+      const rotSpeed = 0.015 + Math.pow(t, 1.5) * 0.135;
+      groupRef.current.rotation.y = clock.getElapsedTime() * rotSpeed;
     }
   });
 
+  // Theme-aware colors - vivid and clearly visible
+  const gridColor = isDark ? '#f0c830' : '#c49a20';
+  const particleColor = isDark ? '#ffd740' : '#d4a820';
+
   return (
     <group ref={groupRef}>
-      {/* メインの歪んだグリッド（水平面） */}
-      <WarpedGrid size={55} divisions={55} opacity={0.15} />
+      {/* メインの歪んだグリッド（水平面） - 画面全体をカバー */}
+      <WarpedGrid size={140} divisions={70} opacity={0.5 * baseOpacity} color={gridColor} />
 
-      {/* 重力場の等高線 - 最初のリングを大きく */}
-      <GravityRings count={20} maxRadius={26} />
+      {/* 第2水平グリッド（上層） - ユークリッド平面構造 */}
+      <WarpedGrid position={[0, 20, 0]} size={140} divisions={50} opacity={0.12 * baseOpacity} color={gridColor} />
+
+      {/* 重力場の等高線 */}
+      <GravityRings count={30} maxRadius={65} color={gridColor} />
 
       {/* 放射状ライン */}
-      <RadialLines count={32} length={28} />
+      <RadialLines count={42} length={68} color={gridColor} />
 
-      {/* 浮遊パーティクル */}
-      <FloatingParticles count={200} />
+      {/* 素粒子パーティクル */}
+      <FloatingParticles count={1000} color={particleColor} />
 
       {/* 事象の地平線 */}
-      <EventHorizon />
+      <EventHorizon color={particleColor} />
 
-      {/* 垂直グリッド（XZ平面、YZ平面の表現） */}
-      <VerticalGrid position={[0, 0, -25]} rotation={[0, 0, 0]} size={50} divisions={25} opacity={0.03} />
-      <VerticalGrid position={[-25, 0, 0]} rotation={[0, Math.PI / 2, 0]} size={50} divisions={25} opacity={0.03} />
+      {/* 垂直グリッド（4面 + 対角面でユークリッド空間を構成） */}
+      <VerticalGrid position={[0, 0, -65]} rotation={[0, 0, 0]} size={130} divisions={35} opacity={0.14 * baseOpacity} color={gridColor} />
+      <VerticalGrid position={[0, 0, 65]} rotation={[0, 0, 0]} size={130} divisions={35} opacity={0.1 * baseOpacity} color={gridColor} />
+      <VerticalGrid position={[-65, 0, 0]} rotation={[0, Math.PI / 2, 0]} size={130} divisions={35} opacity={0.14 * baseOpacity} color={gridColor} />
+      <VerticalGrid position={[65, 0, 0]} rotation={[0, Math.PI / 2, 0]} size={130} divisions={35} opacity={0.14 * baseOpacity} color={gridColor} />
+      {/* 対角面（45度回転）- 空間の奥行き感を強化 */}
+      <VerticalGrid position={[0, 0, 0]} rotation={[0, Math.PI / 4, 0]} size={130} divisions={30} opacity={0.07 * baseOpacity} color={gridColor} />
+      <VerticalGrid position={[0, 0, 0]} rotation={[0, -Math.PI / 4, 0]} size={130} divisions={30} opacity={0.07 * baseOpacity} color={gridColor} />
     </group>
   );
 }
 
 // メインコンポーネント
-export function GravitationalField({ style = {} }) {
+export function GravitationalField({ style = {}, isDark = true, transitionIntensityRef }) {
+  const containerRef = useRef(null);
+  const defaultRef = useRef({ value: 0 });
+  const activeRef = transitionIntensityRef || defaultRef;
+
   return (
     <div
+      ref={containerRef}
       style={{
         position: 'fixed',
         top: 0,
@@ -420,15 +524,21 @@ export function GravitationalField({ style = {} }) {
         height: '100vh',
         zIndex: 0,
         pointerEvents: 'none',
+        transition: 'opacity 0.4s ease',
         ...style,
       }}
     >
       <Canvas
-        camera={{ position: [0, 22, 32], fov: 60, near: 0.1, far: 200 }}
+        camera={{ position: [0, 45, 25], fov: 85, near: 0.1, far: 500 }}
         gl={{ antialias: true, alpha: true }}
         style={{ background: 'transparent' }}
       >
-        <Scene />
+        <TransitionContext.Provider value={activeRef}>
+          <SceneThemeContext.Provider value={{ isDark }}>
+            <Scene />
+            <ContainerFilterUpdater containerRef={containerRef} />
+          </SceneThemeContext.Provider>
+        </TransitionContext.Provider>
       </Canvas>
     </div>
   );

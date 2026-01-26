@@ -6,9 +6,10 @@
 import React, { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { useBreakpoints } from '../../hooks/useBreakpoints';
-import { colors, typography } from '../../tokens';
+import { typography } from '../../tokens';
 import { PageLayout } from './PageLayout';
 import { businesses } from '../../data/corporate';
+import { useTheme } from '../../contexts';
 
 // ============================================
 // Coming Soon Content
@@ -16,6 +17,7 @@ import { businesses } from '../../data/corporate';
 
 function ComingSoonContent({ businessId }) {
   const { isMobile } = useBreakpoints();
+  const { colors } = useTheme();
   const contentRef = useRef();
   const business = businesses.find(b => b.id === businessId);
 
@@ -29,7 +31,7 @@ function ComingSoonContent({ businessId }) {
           duration: 0.8,
           ease: 'power3.out',
           stagger: 0.15,
-          delay: 0.2
+          delay: 0.45
         }
       );
     }, contentRef);
@@ -82,6 +84,7 @@ function ComingSoonContent({ businessId }) {
           userSelect: 'none',
           pointerEvents: 'none',
         }}
+        aria-hidden="true"
       >
         COMING SOON
       </div>
@@ -243,7 +246,7 @@ function ComingSoonContent({ businessId }) {
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.background = business.color;
-              e.currentTarget.style.color = '#0a0a12';
+              e.currentTarget.style.color = colors.bg.primary;
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.background = 'transparent';
@@ -309,7 +312,7 @@ function ComingSoonContent({ businessId }) {
 
 export default function ComingSoonPage({ businessId, onNavigate }) {
   return (
-    <PageLayout currentPage={businessId} onNavigate={onNavigate}>
+    <PageLayout currentPage={businessId} onNavigate={onNavigate} hideFooter>
       <ComingSoonContent businessId={businessId} />
 
       <style>{`

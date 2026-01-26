@@ -12,7 +12,7 @@ export * from './hooks';
 export * from './components/3d';
 
 // Corporate data
-export * from './data/corporate';
+export * from './data';
 
 // Page components
 export * from './components/pages';

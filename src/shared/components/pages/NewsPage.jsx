@@ -3,12 +3,18 @@
  * お知らせ・ニュース
  */
 
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useBreakpoints } from '../../hooks/useBreakpoints';
 import { useSEO, SEO_PRESETS } from '../../hooks';
-import { colors, typography } from '../../tokens';
-import { news } from '../../data/corporate';
+import { typography } from '../../tokens';
+import { news } from '../../data/news';
 import { PageLayout, PageHero, Section } from './PageLayout';
+import { useTheme } from '../../contexts';
+import { prefersReducedMotion } from '../../animations/gsapSetup';
+
+gsap.registerPlugin(ScrollTrigger);
 
 // ============================================
 // News Card Component
@@ -16,6 +22,7 @@ import { PageLayout, PageHero, Section } from './PageLayout';
 
 function NewsCard({ item, index }) {
   const { isMobile } = useBreakpoints();
+  const { colors } = useTheme();
 
   const categoryColors = {
     news: '#8A9BAD',
@@ -31,11 +38,12 @@ function NewsCard({ item, index }) {
 
   return (
     <article
+      className="news-card"
       style={{
-        background: '#0f0f18',
+        background: colors.bg.secondary,
         borderRadius: '8px',
         padding: isMobile ? '24px' : '30px',
-        border: '1px solid rgba(255,255,255,0.08)',
+        border: `1px solid ${colors.ui.border}`,
         transition: 'border-color 0.3s ease',
       }}
     >
@@ -59,7 +67,7 @@ function NewsCard({ item, index }) {
           {categoryLabels[item.category] || 'NEWS'}
         </span>
         <span style={{
-          color: 'rgba(255,255,255,0.4)',
+          color: colors.text.muted,
           fontSize: '11px',
           fontFamily: typography.fontFamily.mono,
         }}>
@@ -69,7 +77,7 @@ function NewsCard({ item, index }) {
 
       {/* Title */}
       <h3 style={{
-        color: '#ffffff',
+        color: colors.text.primary,
         fontSize: isMobile ? '16px' : '18px',
         fontWeight: 500,
         lineHeight: 1.5,
@@ -81,7 +89,7 @@ function NewsCard({ item, index }) {
 
       {/* Excerpt */}
       <p style={{
-        color: 'rgba(255,255,255,0.6)',
+        color: colors.text.tertiary,
         fontSize: '13px',
         lineHeight: 1.8,
         margin: 0,
@@ -98,9 +106,46 @@ function NewsCard({ item, index }) {
 
 export default function NewsPage({ onNavigate }) {
   const { isMobile } = useBreakpoints();
+  const { colors } = useTheme();
+  const gridRef = useRef();
 
   // SEO設定
   useSEO(SEO_PRESETS.news);
+
+  // Scroll-triggered stagger from center
+  useEffect(() => {
+    if (!gridRef.current || prefersReducedMotion()) return;
+
+    const cards = gridRef.current.querySelectorAll('.news-card');
+    if (cards.length === 0) return;
+
+    const ctx = gsap.context(() => {
+      gsap.fromTo(cards,
+        {
+          opacity: 0,
+          y: 50,
+          scale: 0.95,
+        },
+        {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 0.6,
+          stagger: {
+            each: 0.08,
+            from: 'center',
+          },
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: gridRef.current,
+            start: 'top 80%',
+          },
+        }
+      );
+    }, gridRef);
+
+    return () => ctx.revert();
+  }, []);
 
   return (
     <PageLayout currentPage="news" onNavigate={onNavigate}>
@@ -110,12 +155,15 @@ export default function NewsPage({ onNavigate }) {
         subtitle="CUBEからの最新情報をお届けします"
       />
 
-      <Section background="#0a0a12">
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)',
-          gap: '24px',
-        }}>
+      <Section background={colors.bg.primary}>
+        <div
+          ref={gridRef}
+          style={{
+            display: 'grid',
+            gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)',
+            gap: '24px',
+          }}
+        >
           {news.map((item, index) => (
             <NewsCard key={item.id} item={item} index={index} />
           ))}
