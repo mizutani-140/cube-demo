@@ -3,9 +3,10 @@
  * CUBEの拠点情報
  */
 
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useCallback } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { GoogleMap, useJsApiLoader, MarkerF } from '@react-google-maps/api';
 import { useBreakpoints } from '../../hooks/useBreakpoints';
 import { useSEO, SEO_PRESETS } from '../../hooks';
 import { colors as defaultColors, typography } from '../../tokens';
@@ -15,6 +16,33 @@ import { prefersReducedMotion } from '../../animations/gsapSetup';
 import { CompanyInfoSection } from '../CompanyInfoSection';
 
 gsap.registerPlugin(ScrollTrigger);
+
+// Google Maps dark mode styles
+const DARK_MAP_STYLES = [
+  { elementType: 'geometry', stylers: [{ color: '#212121' }] },
+  { elementType: 'labels.icon', stylers: [{ visibility: 'off' }] },
+  { elementType: 'labels.text.fill', stylers: [{ color: '#757575' }] },
+  { elementType: 'labels.text.stroke', stylers: [{ color: '#212121' }] },
+  { featureType: 'administrative', elementType: 'geometry', stylers: [{ color: '#757575' }] },
+  { featureType: 'poi', elementType: 'geometry', stylers: [{ color: '#181818' }] },
+  { featureType: 'poi.park', elementType: 'geometry', stylers: [{ color: '#1b3a1b' }] },
+  { featureType: 'road', elementType: 'geometry.fill', stylers: [{ color: '#2c2c2c' }] },
+  { featureType: 'road', elementType: 'labels.text.fill', stylers: [{ color: '#8a8a8a' }] },
+  { featureType: 'road.arterial', elementType: 'geometry', stylers: [{ color: '#373737' }] },
+  { featureType: 'road.highway', elementType: 'geometry', stylers: [{ color: '#3c3c3c' }] },
+  { featureType: 'road.highway.controlled_access', elementType: 'geometry', stylers: [{ color: '#4e4e4e' }] },
+  { featureType: 'transit', elementType: 'geometry', stylers: [{ color: '#2f3948' }] },
+  { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#000000' }] },
+  { featureType: 'water', elementType: 'labels.text.fill', stylers: [{ color: '#3d3d3d' }] },
+];
+
+// Google Maps light mode styles (subtle desaturation)
+const LIGHT_MAP_STYLES = [
+  { featureType: 'all', elementType: 'geometry', stylers: [{ saturation: -15 }] },
+  { featureType: 'all', elementType: 'labels.text.fill', stylers: [{ color: '#555555' }] },
+  { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#c9d9e8' }] },
+  { featureType: 'poi.park', elementType: 'geometry', stylers: [{ color: '#c5e8c5' }] },
+];
 
 // Location data (colors are applied via theme)
 const getLocations = (goldColor) => [
@@ -32,7 +60,8 @@ const getLocations = (goldColor) => [
     tel: '03-6712-2354',
     note: '※ご来社の際は事前にご連絡ください',
     color: goldColor,
-    mapQuery: '東京都目黒区上目黒4-18-25',
+    lat: 35.64146413426033,
+    lng: 139.69030607776634,
   },
   {
     id: 'yutenji-office',
@@ -47,7 +76,8 @@ const getLocations = (goldColor) => [
     tel: '03-6712-2354',
     note: '※ご来社の際は事前にご連絡ください',
     color: '#8A9BAD',
-    mapQuery: '東京都目黒区祐天寺2-12-11',
+    lat: 35.63652995332695,
+    lng: 139.69136356958802,
   },
   {
     id: 'lambchan',
@@ -63,7 +93,8 @@ const getLocations = (goldColor) => [
     tel: '03-5734-1814',
     note: null,
     color: '#e74c3c',
-    mapQuery: '東京都目黒区上目黒4-9-4',
+    lat: 35.641471915925415,
+    lng: 139.6939028075852,
   },
   {
     id: 'gallery',
@@ -78,7 +109,8 @@ const getLocations = (goldColor) => [
     tel: '03-5787-6672',
     note: '※展示スケジュールはNEWSをご確認ください',
     color: '#5FAD8B',
-    mapQuery: '東京都世田谷区下馬2-44-11',
+    lat: 35.644612960657724,
+    lng: 139.67924168155363,
   },
 ];
 
@@ -86,10 +118,23 @@ const getLocations = (goldColor) => [
 // Location Card
 // ============================================
 
-function LocationCard({ location, index }) {
+function LocationCard({ location, index, isMapLoaded }) {
   const cardRef = useRef();
   const { isMobile } = useBreakpoints();
   const { colors, isDark } = useTheme();
+
+  const mapOptions = {
+    zoom: 17,
+    center: { lat: location.lat, lng: location.lng },
+    disableDefaultUI: true,
+    zoomControl: true,
+    styles: isDark ? DARK_MAP_STYLES : LIGHT_MAP_STYLES,
+    gestureHandling: 'cooperative',
+  };
+
+  const onMapLoad = useCallback((map) => {
+    map.setCenter({ lat: location.lat, lng: location.lng });
+  }, [location.lat, location.lng]);
 
   useEffect(() => {
     if (!cardRef.current) return;
@@ -140,19 +185,32 @@ function LocationCard({ location, index }) {
         position: 'relative',
         overflow: 'hidden',
       }}>
-        <iframe
-          src={`https://www.google.com/maps?q=${encodeURIComponent(location.mapQuery)}&output=embed&hl=ja`}
-          width="100%"
-          height="100%"
-          style={{
-            border: 0,
-            filter: isDark ? 'grayscale(30%) contrast(1.1)' : 'grayscale(10%) contrast(1.05)',
-          }}
-          allowFullScreen=""
-          loading="lazy"
-          referrerPolicy="no-referrer-when-downgrade"
-          title={`${location.name}の地図`}
-        />
+        {isMapLoaded ? (
+          <GoogleMap
+            mapContainerStyle={{ width: '100%', height: '100%' }}
+            options={mapOptions}
+            onLoad={onMapLoad}
+          >
+            <MarkerF
+              position={{ lat: location.lat, lng: location.lng }}
+              title={location.name}
+            />
+          </GoogleMap>
+        ) : (
+          <div style={{
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: colors.bg.secondary,
+            color: colors.text.muted,
+            fontSize: '12px',
+            letterSpacing: '1px',
+          }}>
+            Loading Map...
+          </div>
+        )}
 
         {/* Location badge */}
         <div style={{
@@ -348,6 +406,12 @@ export default function AccessPage({ onNavigate }) {
   const { isMobile } = useBreakpoints();
   const { colors, isDark } = useTheme();
 
+  const { isLoaded } = useJsApiLoader({
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '',
+    language: 'ja',
+    region: 'JP',
+  });
+
   // SEO設定
   useSEO(SEO_PRESETS.access);
 
@@ -371,7 +435,7 @@ export default function AccessPage({ onNavigate }) {
           gap: isMobile ? '24px' : '32px',
         }}>
           {locations.map((location, index) => (
-            <LocationCard key={location.id} location={location} index={index} />
+            <LocationCard key={location.id} location={location} index={index} isMapLoaded={isLoaded} />
           ))}
         </div>
       </Section>

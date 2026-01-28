@@ -225,22 +225,4 @@ export const projects = [
       '/portfolio/y-residence-4.jpg',
     ],
   },
-  {
-    id: 'harebozu',
-    title: '晴れ坊主',
-    titleEn: 'Harebozu',
-    titleJa: '晴れ坊主',
-    category: 'RESTAURANT',
-    year: '2023',
-    location: '東京都',
-    description: '晴れやかな気持ちになれる空間。日本の食文化と現代的なデザインが融合した、温かみのある飲食空間。',
-    tags: ['飲食店', '和食', 'デザイン'],
-    color: '#F5A623',
-    image: '/portfolio/harebozu.jpg',
-    gallery: [
-      '/portfolio/harebozu.jpg',
-      '/portfolio/harebozu-2.jpg',
-      '/portfolio/harebozu-3.jpg',
-    ],
-  },
 ];

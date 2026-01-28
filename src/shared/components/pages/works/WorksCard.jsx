@@ -1,82 +1,28 @@
 /**
  * WorksCard - Project Card Component
  *
- * Individual project card with Anime.js hover effects + GSAP 3D mouse tilt.
- * Image zoom, color overlay, corner accents, and perspective tracking.
+ * Individual project card with hover effects.
+ * Color overlay, corner accents, and content reveal.
  */
 
 import React, { useRef, useState, useCallback } from 'react';
-import { gsap } from 'gsap';
 import { useBreakpoints } from '../../../hooks/useBreakpoints';
 import { typography } from '../../../tokens';
-import { useWorksAnimations } from './useWorksAnimations';
 import { useTheme } from '../../../contexts';
-import { prefersReducedMotion, isMobileDevice } from '../../../animations/gsapSetup';
 
 export function WorksCard({ project, index, style, onClick }) {
   const { isMobile } = useBreakpoints();
   const { colors } = useTheme();
   const cardRef = useRef();
-  const imageRef = useRef();
   const [isHovered, setIsHovered] = useState(false);
-  const { animateCardEnter, animateCardLeave } = useWorksAnimations();
-
-  // 3D tilt on mouse move
-  const handleMouseMove = useCallback((e) => {
-    if (!cardRef.current || prefersReducedMotion() || isMobileDevice()) return;
-    const rect = cardRef.current.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width;
-    const y = (e.clientY - rect.top) / rect.height;
-    const rotateY = (x - 0.5) * 10;  // ±5 degrees
-    const rotateX = (0.5 - y) * 8;   // ±4 degrees
-
-    gsap.to(cardRef.current, {
-      rotationY: rotateY,
-      rotationX: rotateX,
-      duration: 0.3,
-      ease: 'power2.out',
-      transformPerspective: 800,
-      transformOrigin: 'center center',
-    });
-
-    // Subtle parallax on the image toward cursor
-    if (imageRef.current) {
-      gsap.to(imageRef.current, {
-        x: (x - 0.5) * 10,
-        y: (y - 0.5) * 10,
-        duration: 0.3,
-        ease: 'power2.out',
-      });
-    }
-  }, []);
 
   const handleMouseEnter = useCallback(() => {
     setIsHovered(true);
-    animateCardEnter(cardRef.current);
-  }, [animateCardEnter]);
+  }, []);
 
   const handleMouseLeave = useCallback(() => {
     setIsHovered(false);
-    animateCardLeave(cardRef.current);
-
-    // Reset 3D tilt with elastic bounce
-    if (cardRef.current && !prefersReducedMotion() && !isMobileDevice()) {
-      gsap.to(cardRef.current, {
-        rotationX: 0,
-        rotationY: 0,
-        duration: 0.7,
-        ease: 'elastic.out(1, 0.4)',
-      });
-    }
-    if (imageRef.current) {
-      gsap.to(imageRef.current, {
-        x: 0,
-        y: 0,
-        duration: 0.5,
-        ease: 'power2.out',
-      });
-    }
-  }, [animateCardLeave]);
+  }, []);
 
   const handleClick = useCallback(() => {
     if (onClick) {
@@ -104,7 +50,6 @@ export function WorksCard({ project, index, style, onClick }) {
       onKeyDown={handleKeyDown}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      onMouseMove={handleMouseMove}
       style={{
         ...style,
         position: 'relative',
@@ -119,7 +64,6 @@ export function WorksCard({ project, index, style, onClick }) {
       {/* Image */}
       {project.image && (
         <img
-          ref={imageRef}
           className="card-image"
           src={project.image}
           alt={project.title}

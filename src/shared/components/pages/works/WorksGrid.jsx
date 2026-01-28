@@ -14,48 +14,14 @@ import { useWorksAnimations } from './useWorksAnimations';
 import { useTheme } from '../../../contexts';
 import { prefersReducedMotion } from '../../../animations/gsapSetup';
 
-gsap.registerPlugin(ScrollTrigger);
-
 export function WorksGrid({ projects, onProjectClick, activeFilter }) {
   const { isMobile } = useBreakpoints();
   const { colors } = useTheme();
   const gridRef = useRef();
-  const { animateFilterAppear, setupScrollReveal } = useWorksAnimations();
+  const ctxRef = useRef(null);
+  const { animateFilterAppear } = useWorksAnimations();
   const [isTransitioning, setIsTransitioning] = useState(false);
   const prevFilterRef = useRef(activeFilter);
-  const hasAnimated = useRef(false);
-
-  // Initial 3D perspective stagger entry on first mount
-  useEffect(() => {
-    if (!gridRef.current || hasAnimated.current || prefersReducedMotion()) return;
-
-    const cards = gridRef.current.querySelectorAll('.works-card');
-    if (cards.length === 0) return;
-
-    hasAnimated.current = true;
-
-    gsap.fromTo(cards,
-      {
-        opacity: 0,
-        y: 80,
-        rotationY: (i) => (i % 2 === 0 ? 10 : -10),
-        scale: 0.92,
-      },
-      {
-        opacity: 1,
-        y: 0,
-        rotationY: 0,
-        scale: 1,
-        duration: 0.8,
-        stagger: 0.08,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: gridRef.current,
-          start: 'top 85%',
-        },
-      }
-    );
-  }, [projects]);
 
   // Handle filter change with FLIP-style transition
   useEffect(() => {
@@ -88,33 +54,84 @@ export function WorksGrid({ projects, onProjectClick, activeFilter }) {
     }
   }, [activeFilter]);
 
-  // Animate new cards after filter transition completes
+  // Scroll-triggered slide-in, reveal, and horizontal parallax for cards
   useEffect(() => {
-    if (!isTransitioning && gridRef.current && prevFilterRef.current === activeFilter) {
-      const cards = gridRef.current.querySelectorAll('.works-card');
-      if (cards.length > 0 && !prefersReducedMotion()) {
-        gsap.fromTo(cards,
-          {
-            opacity: 0,
-            y: 40,
-            scale: 0.9,
-          },
-          {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            duration: 0.5,
-            stagger: {
-              each: 0.06,
-              from: 'center',
-            },
-            ease: 'power3.out',
-            delay: 0.05,
-          }
-        );
-      }
+    if (isTransitioning || !gridRef.current) return;
+
+    const cards = gridRef.current.querySelectorAll('.works-card');
+    if (!cards || cards.length === 0) return;
+
+    if (prefersReducedMotion()) {
+      gsap.set(cards, { clearProps: 'all' });
+      return;
     }
-  }, [isTransitioning, activeFilter, projects]);
+
+    // Small delay to let the grid container opacity transition finish
+    const timer = setTimeout(() => {
+      const vw = window.innerWidth;
+
+      const ctx = gsap.context(() => {
+        cards.forEach((card, index) => {
+          // Determine slide direction based on grid column pattern
+          const pattern = index % 6;
+          const isLeftSide = isMobile
+            ? index % 2 === 0
+            : [0, 3, 5].includes(pattern);
+
+          // Off-screen start position (40-50% of viewport width)
+          const offScreenX = isMobile
+            ? (isLeftSide ? -(vw * 0.5) : vw * 0.5)
+            : (isLeftSide ? -(vw * 0.4) : vw * 0.4);
+
+          // 1. Slide-in from off-screen, scrubbed to scroll
+          gsap.fromTo(
+            card,
+            {
+              x: offScreenX,
+              y: 60,
+              opacity: 0,
+            },
+            {
+              x: 0,
+              y: 0,
+              opacity: 1,
+              ease: 'power2.out',
+              scrollTrigger: {
+                trigger: card,
+                start: 'top bottom',
+                end: 'top 55%',
+                scrub: 0.6,
+              },
+            }
+          );
+
+          // 2. Horizontal scroll parallax (subtle drift after reveal)
+          gsap.fromTo(
+            card,
+            { xPercent: isLeftSide ? -2 : 2 },
+            {
+              xPercent: isLeftSide ? 2 : -2,
+              ease: 'none',
+              scrollTrigger: {
+                trigger: card,
+                start: 'top 55%',
+                end: 'bottom top',
+                scrub: 0.8,
+              },
+            }
+          );
+        });
+      }, gridRef);
+
+      // Store ctx for cleanup
+      ctxRef.current = ctx;
+    }, 180);
+
+    return () => {
+      clearTimeout(timer);
+      ctxRef.current?.revert();
+    };
+  }, [isTransitioning, activeFilter, projects, isMobile]);
 
   // Asymmetric grid placement patterns
   const getGridStyle = useCallback((index) => {
@@ -166,7 +183,6 @@ export function WorksGrid({ projects, onProjectClick, activeFilter }) {
           display: 'grid',
           gridTemplateColumns: isMobile ? '1fr' : 'repeat(12, 1fr)',
           gap: isMobile ? '24px' : '24px',
-          perspective: isMobile ? 'none' : '1000px',
           opacity: isTransitioning ? 0 : 1,
           transition: 'opacity 0.15s ease',
         }}

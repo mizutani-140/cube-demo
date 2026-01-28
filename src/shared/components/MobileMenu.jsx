@@ -10,6 +10,7 @@ import { gsap } from 'gsap';
 import { typography, zIndex } from '../tokens';
 import { company } from '../data/corporate';
 import { useTheme } from '../contexts';
+import { useBreakpoints } from '../hooks/useBreakpoints';
 
 // ============================================
 // Hamburger Button
@@ -100,13 +101,17 @@ export function MobileMenuOverlay({
   onClose,     // () => void
 }) {
   const { colors, isDark } = useTheme();
+  const { isMobile } = useBreakpoints();
   const overlayRef = useRef(null);
   const contentRef = useRef(null);
   const itemsRef = useRef([]);
   const linesRef = useRef([]);
   const tlRef = useRef(null);
 
-  const menuBg = isDark ? 'rgba(6, 6, 10, 0.97)' : 'rgba(245, 242, 235, 0.97)';
+  // Fully opaque on mobile to avoid expensive compositing; semi-transparent on desktop
+  const menuBg = isMobile
+    ? (isDark ? 'rgb(6, 6, 10)' : 'rgb(245, 242, 235)')
+    : (isDark ? 'rgba(6, 6, 10, 0.97)' : 'rgba(245, 242, 235, 0.97)');
 
   // Lock body scroll
   useEffect(() => {
@@ -136,66 +141,96 @@ export function MobileMenuOverlay({
     const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
     tlRef.current = tl;
 
-    // Overlay reveal via clip-path circle from top-right
-    tl.fromTo(overlayRef.current,
-      { clipPath: 'circle(0% at calc(100% - 40px) 40px)', opacity: 1 },
-      { clipPath: 'circle(150% at calc(100% - 40px) 40px)', duration: 0.8, ease: 'power3.inOut' }
-    );
-
-    // Top accent line draws in
-    const topLine = overlayRef.current.querySelector('.menu-accent-line');
-    if (topLine) {
-      tl.fromTo(topLine,
-        { scaleX: 0, transformOrigin: 'left center' },
-        { scaleX: 1, duration: 0.6, ease: 'power2.inOut' },
-        0.3
+    if (isMobile) {
+      // Mobile: lightweight opacity + translateY (no clip-path, no skew)
+      tl.fromTo(overlayRef.current,
+        { opacity: 0 },
+        { opacity: 1, duration: 0.35, ease: 'power2.out' }
       );
-    }
 
-    // Decorative vertical text
-    const verticalText = overlayRef.current.querySelector('.menu-vertical-text');
-    if (verticalText) {
-      tl.fromTo(verticalText,
-        { opacity: 0, y: 30 },
-        { opacity: 0.08, y: 0, duration: 0.8 },
-        0.4
-      );
-    }
+      const validItems = itemsRef.current.filter(Boolean);
+      if (validItems.length) {
+        tl.fromTo(validItems,
+          { opacity: 0, y: 24 },
+          { opacity: 1, y: 0, duration: 0.4, stagger: 0.05, force3D: true },
+          0.15
+        );
+      }
 
-    // Menu items stagger entrance
-    const validItems = itemsRef.current.filter(Boolean);
-    if (validItems.length) {
-      tl.fromTo(validItems,
-        { opacity: 0, x: 60, skewX: -3 },
-        { opacity: 1, x: 0, skewX: 0, duration: 0.6, stagger: 0.06 },
-        0.35
-      );
-    }
+      const validLines = linesRef.current.filter(Boolean);
+      if (validLines.length) {
+        tl.fromTo(validLines,
+          { scaleX: 0, transformOrigin: 'right center' },
+          { scaleX: 1, duration: 0.35, stagger: 0.04, force3D: true },
+          0.2
+        );
+      }
 
-    // Separator lines draw in
-    const validLines = linesRef.current.filter(Boolean);
-    if (validLines.length) {
-      tl.fromTo(validLines,
-        { scaleX: 0, transformOrigin: 'right center' },
-        { scaleX: 1, duration: 0.5, stagger: 0.06 },
-        0.4
+      const bottomInfo = overlayRef.current.querySelector('.menu-bottom-info');
+      if (bottomInfo) {
+        tl.fromTo(bottomInfo,
+          { opacity: 0 },
+          { opacity: 1, duration: 0.3 },
+          0.35
+        );
+      }
+    } else {
+      // Desktop: full clip-path circle reveal
+      tl.fromTo(overlayRef.current,
+        { clipPath: 'circle(0% at calc(100% - 40px) 40px)', opacity: 1 },
+        { clipPath: 'circle(150% at calc(100% - 40px) 40px)', duration: 0.8, ease: 'power3.inOut' }
       );
-    }
 
-    // Bottom info fade in
-    const bottomInfo = overlayRef.current.querySelector('.menu-bottom-info');
-    if (bottomInfo) {
-      tl.fromTo(bottomInfo,
-        { opacity: 0, y: 10 },
-        { opacity: 1, y: 0, duration: 0.5 },
-        0.6
-      );
+      const topLine = overlayRef.current.querySelector('.menu-accent-line');
+      if (topLine) {
+        tl.fromTo(topLine,
+          { scaleX: 0, transformOrigin: 'left center' },
+          { scaleX: 1, duration: 0.6, ease: 'power2.inOut' },
+          0.3
+        );
+      }
+
+      const verticalText = overlayRef.current.querySelector('.menu-vertical-text');
+      if (verticalText) {
+        tl.fromTo(verticalText,
+          { opacity: 0, y: 30 },
+          { opacity: 0.08, y: 0, duration: 0.8 },
+          0.4
+        );
+      }
+
+      const validItems = itemsRef.current.filter(Boolean);
+      if (validItems.length) {
+        tl.fromTo(validItems,
+          { opacity: 0, x: 60, skewX: -3 },
+          { opacity: 1, x: 0, skewX: 0, duration: 0.6, stagger: 0.06 },
+          0.35
+        );
+      }
+
+      const validLines = linesRef.current.filter(Boolean);
+      if (validLines.length) {
+        tl.fromTo(validLines,
+          { scaleX: 0, transformOrigin: 'right center' },
+          { scaleX: 1, duration: 0.5, stagger: 0.06 },
+          0.4
+        );
+      }
+
+      const bottomInfo = overlayRef.current.querySelector('.menu-bottom-info');
+      if (bottomInfo) {
+        tl.fromTo(bottomInfo,
+          { opacity: 0, y: 10 },
+          { opacity: 1, y: 0, duration: 0.5 },
+          0.6
+        );
+      }
     }
 
     return () => {
       tl.kill();
     };
-  }, [isOpen]);
+  }, [isOpen, isMobile]);
 
   const handleItemClick = useCallback((item) => {
     // Exit animation then navigate
@@ -209,23 +244,34 @@ export function MobileMenuOverlay({
       },
     });
 
-    // Fade items out quickly
     const validItems = itemsRef.current.filter(Boolean);
-    if (validItems.length) {
-      tl.to(validItems, {
-        opacity: 0, x: -30, duration: 0.25, stagger: 0.02,
-      });
-    }
 
-    // Collapse overlay
-    if (overlayRef.current) {
-      tl.to(overlayRef.current, {
-        clipPath: 'circle(0% at calc(100% - 40px) 40px)',
-        duration: 0.5,
-        ease: 'power3.inOut',
-      }, 0.15);
+    if (isMobile) {
+      // Mobile: simple fast fade-out
+      if (validItems.length) {
+        tl.to(validItems, {
+          opacity: 0, y: -16, duration: 0.2, stagger: 0.02, force3D: true,
+        });
+      }
+      if (overlayRef.current) {
+        tl.to(overlayRef.current, { opacity: 0, duration: 0.25 }, 0.1);
+      }
+    } else {
+      // Desktop: slide + clip-path collapse
+      if (validItems.length) {
+        tl.to(validItems, {
+          opacity: 0, x: -30, duration: 0.25, stagger: 0.02,
+        });
+      }
+      if (overlayRef.current) {
+        tl.to(overlayRef.current, {
+          clipPath: 'circle(0% at calc(100% - 40px) 40px)',
+          duration: 0.5,
+          ease: 'power3.inOut',
+        }, 0.15);
+      }
     }
-  }, [onSelect, onClose]);
+  }, [onSelect, onClose, isMobile]);
 
   if (!isOpen) return null;
 
@@ -241,12 +287,19 @@ export function MobileMenuOverlay({
         inset: 0,
         zIndex: zIndex.overlay,
         background: menuBg,
-        backdropFilter: 'blur(24px)',
-        WebkitBackdropFilter: 'blur(24px)',
+        // backdrop-filter only on desktop; too expensive on mobile
+        ...(isMobile ? {} : {
+          backdropFilter: 'blur(24px)',
+          WebkitBackdropFilter: 'blur(24px)',
+        }),
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        clipPath: 'circle(0% at calc(100% - 40px) 40px)',
+        // Mobile uses opacity animation; desktop uses clip-path
+        ...(isMobile
+          ? { opacity: 0 }
+          : { clipPath: 'circle(0% at calc(100% - 40px) 40px)' }
+        ),
       }}
     >
       {/* Top accent line */}

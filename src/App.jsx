@@ -39,7 +39,7 @@ function App() {
 
   return (
     <>
-      <PlanAApp key={skipIntro ? 'skip' : 'normal'} initialPage="cube" />
+      <PlanAApp key={skipIntro ? 'skip' : 'normal'} initialPage={new URLSearchParams(window.location.search).get('page') || 'cube'} />
       {import.meta.env.DEV && (
         <div
           style={{
