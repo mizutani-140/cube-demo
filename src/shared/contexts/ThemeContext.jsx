@@ -75,7 +75,7 @@ function getSystemTheme() {
   if (typeof window !== 'undefined' && window.matchMedia) {
     return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
   }
-  return 'dark';
+  return 'light';
 }
 
 // テーマコンテキスト
@@ -91,7 +91,7 @@ export function ThemeProvider({ children }) {
       const legacy = localStorage.getItem('cube-theme');
       if (legacy === 'dark' || legacy === 'light') return legacy;
     }
-    return 'dark';
+    return 'light';
   });
 
   // システム設定の追跡（system モードの場合に使用）
@@ -116,12 +116,12 @@ export function ThemeProvider({ children }) {
     return resolvedTheme === 'light' ? lightColors : darkColors;
   }, [resolvedTheme]);
 
-  // テーマモードを3段階で切り替え: dark → light → system → dark
+  // テーマモードを3段階で切り替え: light → dark → system → light
   const cycleTheme = useCallback(() => {
     setMode(prev => {
-      if (prev === 'dark') return 'light';
-      if (prev === 'light') return 'system';
-      return 'dark';
+      if (prev === 'light') return 'dark';
+      if (prev === 'dark') return 'system';
+      return 'light';
     });
   }, []);
 

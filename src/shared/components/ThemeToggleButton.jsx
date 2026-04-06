@@ -57,9 +57,9 @@ export function ThemeToggleButton({ size = 16, style }) {
     <button
       onClick={cycleTheme}
       aria-label={
-        mode === 'dark' ? 'Dark mode - click for light mode' :
-        mode === 'light' ? 'Light mode - click for system' :
-        'System mode - click for dark mode'
+        mode === 'light' ? 'Light mode - click for dark mode' :
+        mode === 'dark' ? 'Dark mode - click for system' :
+        'System mode - click for light mode'
       }
       title={
         mode === 'dark' ? 'Dark' :

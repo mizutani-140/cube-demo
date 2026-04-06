@@ -29,8 +29,8 @@ export function CompanyInfoSection({ animationDirection = 'up' }) {
     { label: '資本金', value: company.capital },
     { label: '代表者', value: `${company.ceoTitle} ${company.ceo}` },
     { label: 'TEL', value: company.tel },
-    { label: '本社所在地', value: company.headquarters.address },
-    { label: '営業所', value: company.office.address },
+    { label: '本社所在地', value: `${company.headquarters.postalCode} ${company.headquarters.address}` },
+    { label: '営業所', value: `${company.office.postalCode} ${company.office.address}` },
   ];
 
   useEffect(() => {

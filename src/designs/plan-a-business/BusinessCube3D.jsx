@@ -289,7 +289,9 @@ function BusinessCube3DInner({ activeFaceIndex, onNavigate, cubeSize, prefersRed
     progress: 1, // Start at 1 = animation complete
     duration: ANIMATION_DURATION,
   });
-  const idleRotation = useRef({ y: 0 });
+  // 初期角度: アイソメトリック（正六面体が見える角度）
+  // Y=π/4 (45°) で2つの垂直面が見え、X tilt で上面も見える
+  const idleRotation = useRef({ y: Math.PI / 4 });
   const prevIndexRef = useRef(activeFaceIndex);
   const prevHasInteracted = useRef(hasInteracted);
   const wasInteractedRef = useRef(false); // Track interacted→idle transition in useFrame
@@ -350,10 +352,12 @@ function BusinessCube3DInner({ activeFaceIndex, onNavigate, cubeSize, prefersRed
     }
     wasInteractedRef.current = hasInteracted;
 
-    // Idle: free slow rotation
+    // Idle: 正六面体が常に見える3D回転
+    // baseXTilt で上面を見せつつ、Y軸回転で各面を順番に表示
     if (!hasInteracted) {
       idleRotation.current.y += dt * 0.12;
-      const targetXWobble = Math.sin(state.clock.elapsedTime * 0.3) * 0.08;
+      const baseXTilt = 0.55; // ~31.5° — 上面が見える角度
+      const targetXWobble = baseXTilt + Math.sin(state.clock.elapsedTime * 0.3) * 0.08;
 
       // Smooth blend from snapped orientation to idle wobble
       if (idleBlendRef.current.blending) {

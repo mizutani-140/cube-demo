@@ -50,7 +50,8 @@ const getLocations = (goldColor) => [
     id: 'office',
     name: 'CUBE 本社',
     nameJa: '本社',
-    address: '東京都目黒区上目黒4-18-25 グレースビル1階',
+    postalCode: '〒153-0051',
+    address: '東京都目黒区上目黒4丁目18-25 グレースビル1階',
     addressEn: '4-18-25 Kamimeguro, Meguro-ku, Tokyo',
     access: [
       '東急東横線・東京メトロ日比谷線「中目黒駅」徒歩8分',
@@ -67,7 +68,8 @@ const getLocations = (goldColor) => [
     id: 'yutenji-office',
     name: 'CUBE 祐天寺オフィス',
     nameJa: '祐天寺オフィス',
-    address: '東京都目黒区祐天寺2-12-11 泉ホームズ102号室',
+    postalCode: '〒153-0052',
+    address: '東京都目黒区祐天寺2丁目12-11 泉ホームズ102号室',
     addressEn: '2-12-11 Yutenji, Meguro-ku, Tokyo',
     access: [
       '東急東横線「祐天寺駅」徒歩3分',
@@ -83,7 +85,8 @@ const getLocations = (goldColor) => [
     id: 'lambchan',
     name: 'Lamb CHAN',
     nameJa: '羊料理専門店',
-    address: '東京都目黒区上目黒4-9-4',
+    postalCode: '〒153-0051',
+    address: '東京都目黒区上目黒4丁目9-4',
     addressEn: '4-9-4 Kamimeguro, Meguro-ku, Tokyo',
     access: [
       '東急東横線・東京メトロ日比谷線「中目黒駅」徒歩5分',
@@ -100,6 +103,7 @@ const getLocations = (goldColor) => [
     id: 'gallery',
     name: 'LIFE NOSTALGIA',
     nameJa: '貸しギャラリー',
+    postalCode: '〒154-0002',
     address: '東京都世田谷区下馬2-44-11',
     addressEn: '2-44-11 Shimouma, Setagaya-ku, Tokyo',
     access: [
@@ -293,7 +297,7 @@ function LocationCard({ location, index, isMapLoaded }) {
             lineHeight: 1.6,
             margin: '0 0 4px 0',
           }}>
-            {location.address}
+            {location.postalCode} {location.address}
           </p>
           <p style={{
             color: colors.text.muted,

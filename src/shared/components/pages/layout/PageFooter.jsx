@@ -275,7 +275,7 @@ export function PageFooter({ onNavigate }) {
                 lineHeight: 1.8,
               }}
             >
-              {company.headquarters.address}
+              {company.headquarters.postalCode} {company.headquarters.address}
             </p>
           </div>
         </div>
